@@ -1,0 +1,225 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  Menu,
+  X,
+  Droplets,
+  LogOut,
+  User,
+  ChevronDown,
+} from "lucide-react";
+import { Button } from "../ui/button";
+import ThemeToggle from "./ThemeToggle";
+import { useAuth } from "../../hooks/useAuth";
+
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/feed", label: "Feed" },
+  { href: "/campaigns", label: "Campaigns" },
+  { href: "/about", label: "About" },
+];
+
+// Helper: get display name from user profile
+function getUserDisplayName(
+  user: ReturnType<typeof useAuth>["user"]
+): string {
+  if (!user) return "";
+  return (
+    user.donorProfile?.name ||
+    user.hospital?.name ||
+    user.organisation?.name ||
+    user.admin?.name ||
+    user.email?.split("@")[0] ||
+    user.contactNumber
+  );
+}
+
+export default function Navbar() {
+  const { user, isAuthenticated, logout } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const displayName = getUserDisplayName(user);
+
+  const handleLogout = async () => {
+    setUserMenuOpen(false);
+    setMobileOpen(false);
+    await logout();
+  };
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:scale-105">
+            <Droplets className="h-5 w-5" />
+          </div>
+          <span className="text-xl font-bold tracking-tight">
+            Blood<span className="text-primary">Link</span>
+          </span>
+        </Link>
+
+        {/* Desktop Links */}
+        <ul className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className="relative px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground rounded-md hover:bg-accent"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        {/* Desktop Right */}
+        <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
+
+          {isAuthenticated && user ? (
+            // ---------- User Dropdown ----------
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen((prev) => !prev)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                aria-haspopup="true"
+                aria-expanded={userMenuOpen}
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+                <span className="max-w-[120px] truncate">{displayName}</span>
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                    userMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {userMenuOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setUserMenuOpen(false)}
+                  />
+                  {/* Dropdown */}
+                  <div className="absolute right-0 top-full z-20 mt-1 w-52 rounded-xl border border-border bg-popover p-1 shadow-lg animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="px-3 py-2 border-b border-border/50 mb-1">
+                      <p className="text-xs text-muted-foreground">Signed in as</p>
+                      <p className="text-sm font-medium truncate">{displayName}</p>
+                      <span className="text-xs text-primary capitalize">
+                        {user.role.replace("_", " ").toLowerCase()}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        router.push("/profile");
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+                    >
+                      <User className="h-4 w-4" />
+                      My Profile
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            // ---------- Guest Buttons ----------
+            <>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/register">Register</Link>
+              </Button>
+            </>
+          )}
+        </div>
+
+        {/* Mobile Right */}
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
+      </nav>
+
+      {/* Mobile Menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200">
+          <div className="px-4 py-4 space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                onClick={() => setMobileOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="pt-3 border-t border-border/40 space-y-2">
+              {isAuthenticated && user ? (
+                <>
+                  <div className="px-4 py-2 text-sm text-muted-foreground">
+                    Signed in as{" "}
+                    <span className="font-medium text-foreground">
+                      {displayName}
+                    </span>
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <User className="h-4 w-4" />
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Link href="/login">Login</Link>
+                  </Button>
+                  <Button size="sm" className="flex-1" asChild>
+                    <Link href="/register">Register</Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}

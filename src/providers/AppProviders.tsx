@@ -3,6 +3,7 @@
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { AuthProvider } from "./AuthProvider";
 
 function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -33,7 +34,8 @@ export default function AppProviders({ children }: { children: ReactNode }) {
         enableSystem
         disableTransitionOnChange
       >
-        {children}
+        {/* AuthProvider is inside ThemeProvider so the loading screen uses correct theme */}
+        <AuthProvider>{children}</AuthProvider>
       </ThemeProvider>
     </QueryProvider>
   );

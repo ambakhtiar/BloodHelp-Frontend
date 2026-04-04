@@ -1,39 +1,42 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosError } from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000/api/v1";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000/api/v1";
 
-// ---------- Token Storage Utility ----------
-let accessToken: string | null = null;
+// ---------- In-Memory Token Store ----------
+let inMemoryAccessToken: string | null = null;
 
-export const getAccessToken = (): string | null => {
-  if (accessToken) return accessToken;
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("accessToken");
-  }
-  return null;
-};
+export const getAccessToken = (): string | null => inMemoryAccessToken;
 
 export const setAccessToken = (token: string): void => {
-  accessToken = token;
-  if (typeof window !== "undefined") {
-    localStorage.setItem("accessToken", token);
-  }
+  inMemoryAccessToken = token;
 };
 
 export const removeAccessToken = (): void => {
-  accessToken = null;
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("accessToken");
-  }
+  inMemoryAccessToken = null;
+};
+
+// ---------- Silent Refresh (called on app boot) ----------
+interface RefreshResponse {
+  data: { accessToken: string };
+}
+
+export const silentRefresh = async (): Promise<string> => {
+  const response = await axios.post<RefreshResponse>(
+    `${BASE_URL}/auth/refresh-token`,
+    {},
+    { withCredentials: true }
+  );
+  const token = response.data.data.accessToken;
+  setAccessToken(token);
+  return token;
 };
 
 // ---------- Axios Instance ----------
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
 // ---------- Request Interceptor ----------
@@ -48,7 +51,7 @@ axiosInstance.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// ---------- Response Interceptor (Refresh Token Logic) ----------
+// ---------- Response Interceptor (Refresh Token Queue) ----------
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
@@ -56,13 +59,7 @@ let failedQueue: Array<{
 }> = [];
 
 const processQueue = (error: unknown, token: string | null = null): void => {
-  failedQueue.forEach((promise) => {
-    if (token) {
-      promise.resolve(token);
-    } else {
-      promise.reject(error);
-    }
-  });
+  failedQueue.forEach((p) => (token ? p.resolve(token) : p.reject(error)));
   failedQueue = [];
 };
 
@@ -77,13 +74,13 @@ axiosInstance.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // Only attempt refresh on 401 and if we haven't already retried
     const isUnauthorized = error.response?.status === 401;
-    const isNotRefreshEndpoint = !originalRequest.url?.includes("/auth/refresh-token");
+    const isNotRefreshEndpoint = !originalRequest?.url?.includes(
+      "/auth/refresh-token"
+    );
 
     if (isUnauthorized && isNotRefreshEndpoint && !originalRequest._retry) {
       if (isRefreshing) {
-        // Queue the request until the token is refreshed
         return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then((token) => {
@@ -98,16 +95,8 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post<{ data: { accessToken: string } }>(
-          `${BASE_URL}/auth/refresh-token`,
-          {},
-          { withCredentials: true }
-        );
-
-        const newToken = data.data.accessToken;
-        setAccessToken(newToken);
+        const newToken = await silentRefresh();
         processQueue(null, newToken);
-
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
         }
@@ -115,12 +104,9 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         removeAccessToken();
-
-        // Redirect to login on client side
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }
-
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

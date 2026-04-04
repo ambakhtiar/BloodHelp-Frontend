@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Geist } from "next/font/google";
 import "./globals.css";
-import AppProviders from "@/providers/AppProviders";
+import AppProviders from "../providers/AppProviders";
+import Navbar from "../components/shared/Navbar";
+import Footer from "../components/shared/Footer";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: {
@@ -24,9 +23,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col antialiased">
-        <AppProviders>{children}</AppProviders>
+    <html lang="en" className={cn("h-full", "font-sans", geist.variable)} suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col antialiased">
+        <AppProviders>
+          <Navbar />
+          <div className="flex-1">{children}</div>
+          <Footer />
+        </AppProviders>
       </body>
     </html>
   );
