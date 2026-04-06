@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import ThemeToggle from "./ThemeToggle";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthContext } from "@/providers/AuthProvider";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -24,7 +24,7 @@ const navLinks = [
 
 // Helper: get display name from user profile
 function getUserDisplayName(
-  user: ReturnType<typeof useAuth>["user"]
+  user: ReturnType<typeof useAuthContext>["user"]
 ): string {
   if (!user) return "";
   return (
@@ -38,7 +38,7 @@ function getUserDisplayName(
 }
 
 export default function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuthContext();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const router = useRouter();
@@ -96,9 +96,8 @@ export default function Navbar() {
                 </div>
                 <span className="max-w-[120px] truncate">{displayName}</span>
                 <ChevronDown
-                  className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
-                    userMenuOpen ? "rotate-180" : ""
-                  }`}
+                  className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -143,10 +142,10 @@ export default function Navbar() {
             // ---------- Guest Buttons ----------
             <>
               <Button variant="outline" size="sm" asChild>
-                <Link href="/login">Login</Link>
+                <Link href="/auth/login">Login</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/register">Register</Link>
+                <Link href="/auth/register">Register</Link>
               </Button>
             </>
           )}
@@ -209,10 +208,10 @@ export default function Navbar() {
               ) : (
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <Link href="/login">Login</Link>
+                    <Link href="/auth/login">Login</Link>
                   </Button>
                   <Button size="sm" className="flex-1" asChild>
-                    <Link href="/register">Register</Link>
+                    <Link href="/auth/register">Register</Link>
                   </Button>
                 </div>
               )}

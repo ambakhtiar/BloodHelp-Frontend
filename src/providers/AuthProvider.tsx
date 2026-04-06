@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       removeAccessToken();
       setUser(null);
-      router.push("/login");
+      router.push("/auth/login");
     }
   }, [router]);
 
