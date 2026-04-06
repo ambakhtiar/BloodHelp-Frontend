@@ -136,11 +136,11 @@ export function RegisterForm() {
   const mutation = useMutation({
     mutationFn: async (payload: RegisterFormValues) => {
       await registerApi(payload);
-      
+
       if (payload.role === "HOSPITAL" || payload.role === "ORGANISATION") {
         return { needsApproval: true };
       }
-      
+
       const emailOrPhone = 'email' in payload && payload.email ? payload.email : payload.contactNumber;
       return loginApi({ emailOrPhone, password: payload.password });
     },
@@ -311,7 +311,7 @@ export function RegisterForm() {
               <input type="text" placeholder="REG-XXXX" value={form.registrationNumber} onChange={(e) => handleChange("registrationNumber", e.target.value)} className={inputClass} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Full Address<RequiredMark /></label>
+              <label className="text-sm font-medium">Full Address</label>
               <input type="text" placeholder="123 Hospital Road, Dhaka" value={form.address} onChange={(e) => handleChange("address", e.target.value)} onBlur={() => handleBlur("address")} className={inputClass} />
               {touched.address && errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
             </div>

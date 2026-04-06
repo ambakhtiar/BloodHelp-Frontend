@@ -42,7 +42,7 @@ export const registerSchema = z.discriminatedUnion("role", [
     ...baseFields,
     role: z.literal("HOSPITAL"),
     registrationNumber: z.string().optional(),
-    address: z.string().min(1, "Address is required"),
+    address: z.string().optional(),
   }),
   z.object({
     ...baseFields,
