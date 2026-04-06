@@ -30,8 +30,8 @@ export default function AppProviders({ children }: { children: ReactNode }) {
     <QueryProvider>
       <ThemeProvider
         attribute="class"
-        defaultTheme="dark"
-        enableSystem
+        defaultTheme="light"
+        enableSystem={false}
         disableTransitionOnChange
       >
         {/* AuthProvider is inside ThemeProvider so the loading screen uses correct theme */}

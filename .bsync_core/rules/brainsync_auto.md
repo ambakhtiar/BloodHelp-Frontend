@@ -1,7 +1,7 @@
 
 
 # Project Memory — Blood-Donors-Management-Frontend
-> 208 notes | Score threshold: >40
+> 353 notes | Score threshold: >40
 
 ## Safety — Never Run Destructive Commands
 
@@ -20,43 +20,56 @@
 
 ## 📝 NOTE: 1 uncommitted file(s) in working tree.\n\n## Important Warnings
 
-- **⚠️ GOTCHA: Added API key auth authentication — uses a proper password hashing algorithm** — - # Project Intelligence (auto-generated)
-+ # Project Intelligence (au
-- **sys_03 in ip_rules.md** — File updated (external): .bsync_core/ip_rules.md
+- **⚠️ GOTCHA: Optimized Score — parallelizes async operations for speed** — - > 326 notes | Score threshold: >40
++ > 343 notes | Score threshold: 
+- **⚠️ GOTCHA: Optimized GOTCHA** — - - ⚠️ GOTCHA: Optimized Score
++ - ⚠️ GOTCHA: Optimized GOTCHA
+- - ⚠️ 
+- **⚠️ GOTCHA: Optimized GOTCHA** — - - ⚠️ GOTCHA: Optimized Score
++ - ⚠️ GOTCHA: Optimized GOTCHA
+- - ⚠️ 
+- **⚠️ GOTCHA: Optimized GOTCHA** — - - ⚠️ GOTCHA: Optimized Score
++ - ⚠️ GOTCHA: Optimized GOTCHA
+- - ⚠️ 
+- **⚠️ GOTCHA: Optimized GOTCHA** — - - ⚠️ GOTCHA: Optimized GOTCHA
++ - ⚠️ GOTCHA: Optimized Score
+- - ⚠️ 
+- **⚠️ GOTCHA: Optimized Score** — - > 322 notes | Score threshold: >40
++ > 326 notes | Score threshold: 
 
-Content summary (9 l
-- **⚠️ GOTCHA: Optimized Intellectual** — - # Intellectual Property & Architecture Rules
-+ # Intellectual Proper
-- **⚠️ GOTCHA: Replaced auth Intellectual — uses a proper password hashing algorithm** — - # Intellectual Property & Architecture Rules
-+ # Intellectual Proper
-- **⚠️ GOTCHA: Replaced auth Intellectual** — - # Intellectual Property & Architecture Rules
-+ # Intellectual Proper
-- **⚠️ GOTCHA: Replaced auth Intellectual** — - # Intellectual Property & Architecture Rules
-+ # Intellectual Proper
+## Active: `src/validations`
+
+- **sys_08 in auth.validation.ts**
+- **Replaced auth Bangladesh — formalizes the data contract with explicit types**
+- **Replaced auth Invalid — formalizes the data contract with explicit types**
 
 ## Project Standards
 
-- Strengthened types Metadata — improves module reusability
-- sys_08 in .gitignore
-- sys_01 in brainsync_auto.md — confirmed 3x
+- sys_08 in auth.validation.ts
 - sys_01 in shared-context.json — confirmed 3x
 - Optimized Score — confirmed 3x
-- sys_01 in brainsync_auto.md — confirmed 3x
-- Added session cookies authentication — protects against XSS and CSRF token theft — confirmed 4x
-- sys_01 in shared-context.json — confirmed 5x
+- sys_01 in shared-context.json — confirmed 10x
+- Replaced auth Link — confirmed 4x
+- sys_02 in shared-context.json — confirmed 3x
+- Added JWT tokens authentication — confirmed 3x
+- Optimized Score — parallelizes async operations for speed — confirmed 3x
+
+## Known Fixes
+
+- ❌ - - Fixed null crash in Link — prevents null/undefined runtime crashes → ✅ sys_02 in agent-rules.md
 
 ## Recent Decisions
 
-- Optimized Project — parallelizes async operations for speed
+- Optimized Score — parallelizes async operations for speed
 - Optimized Score — parallelizes async operations for speed
 - Optimized Score — parallelizes async operations for speed
 - Optimized Score — parallelizes async operations for speed
 
 ## Learned Patterns
 
-- Decision: Optimized Intellectual (seen 2x)
 - Decision: Optimized Score (seen 2x)
 - Avoid: ⚠️ GOTCHA: Replaced auth Intellectual (seen 2x)
+- Avoid: ⚠️ GOTCHA: Optimized GOTCHA (seen 2x)
 - Agent generates new migration for every change (squash related changes)
 - Agent installs packages without checking if already installed
 

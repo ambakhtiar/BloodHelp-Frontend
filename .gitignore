@@ -57,3 +57,9 @@ CLAUDE.md
 
 .brainsync/agent-rules.md
 .agent-mem/
+
+# Auto-generated AI agent exclusions
+.clineRules
+.agent/
+.gemini/
+.cline/
