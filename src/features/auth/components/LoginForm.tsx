@@ -87,8 +87,8 @@ export function LoginForm() {
           <div className="flex-1 text-sm font-medium leading-relaxed">
             {serverError}
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => setServerError(null)}
             className="rounded-md p-1 hover:bg-destructive/10 transition-colors"
           >

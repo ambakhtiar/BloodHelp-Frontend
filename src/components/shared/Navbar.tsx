@@ -18,7 +18,7 @@ import { useAuthContext } from "@/providers/AuthProvider";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/feed", label: "Feed" },
-  { href: "/campaigns", label: "Campaigns" },
+  { href: "/donors", label: "Search Donors" },
   { href: "/about", label: "About" },
 ];
 
@@ -92,15 +92,15 @@ export default function Navbar() {
                 aria-expanded={userMenuOpen}
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold border border-primary/20 overflow-hidden shrink-0">
-                   {user.profilePictureUrl ? (
-                      <img 
-                        src={user.profilePictureUrl} 
-                        alt={displayName} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      displayName.charAt(0).toUpperCase()
-                    )}
+                  {user.profilePictureUrl ? (
+                    <img
+                      src={user.profilePictureUrl}
+                      alt={displayName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    displayName.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <span className="max-w-[120px] truncate">{displayName}</span>
                 <ChevronDown
