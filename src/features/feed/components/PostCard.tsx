@@ -23,6 +23,7 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
+  CheckCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -40,7 +41,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { deletePost } from "@/services/post.service";
+import { deletePost, resolvePost } from "@/services/post.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EditPostModal } from "./EditPostModal";
 import Image from "next/image";
@@ -250,6 +251,25 @@ export function PostCard({ post }: PostCardProps) {
     setIsDeleteDialogOpen(false);
   };
 
+  // Mutation for resolving a post
+  const resolveMutation = useMutation({
+    mutationFn: (postId: string) => resolvePost(postId),
+    onSuccess: () => {
+      toast.success("Post marked as resolved");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", post.id] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to resolve post");
+    },
+  });
+
+  const handleResolve = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    resolveMutation.mutate(post.id);
+  };
+
   // Extract correct author name based on role
   const authorName =
     post.author?.donorProfile?.name ||
@@ -321,7 +341,9 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <Card
       onClick={handleCardClick}
-      className="w-full mb-4 shadow-sm border border-primary/5 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20 bg-card group/card cursor-pointer"
+      className={`w-full mb-4 shadow-sm border border-primary/5 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20 bg-card group/card cursor-pointer ${
+        post.isResolved ? "opacity-75 grayscale-[0.2]" : ""
+      }`}
     >
       <CardHeader className="flex flex-row items-start gap-3 pb-3">
         {/* Avatar */}
@@ -393,6 +415,19 @@ export function PostCard({ post }: PostCardProps) {
                     >
                       <Pencil className="h-4 w-4" /> Edit Post
                     </DropdownMenuItem>
+                    
+                    {/* Resolve Option */}
+                    {["BLOOD_FINDING", "HELPING"].includes(post.type) && !post.isResolved && (
+                      <DropdownMenuItem 
+                        className="cursor-pointer gap-2 text-emerald-600 focus:text-emerald-700"
+                        onClick={handleResolve}
+                        disabled={resolveMutation.isPending}
+                      >
+                        <CheckCircle className="h-4 w-4" /> 
+                        {resolveMutation.isPending ? "Resolving..." : "Mark as Resolved"}
+                      </DropdownMenuItem>
+                    )}
+
                     <DropdownMenuItem 
                       className="cursor-pointer gap-2 text-destructive focus:text-destructive"
                       onClick={(e) => {

@@ -76,3 +76,8 @@ export const deletePost = async (id: string): Promise<any> => {
   const response = await axiosInstance.delete(`/posts/${id}`);
   return response.data;
 };
+
+export const resolvePost = async (id: string): Promise<any> => {
+  const response = await axiosInstance.patch(`/posts/${id}/resolve`);
+  return response.data;
+};
