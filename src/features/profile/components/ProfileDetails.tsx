@@ -18,11 +18,12 @@ import {
   FileText,
   Users
 } from "lucide-react";
-import { getMyProfile } from "@/services/user.service";
+import { getMyProfile, getDonationHistory } from "@/services/user.service";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Trophy, Star, Award, Medal, Crown } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { EditProfileModal } from "./EditProfileModal";
@@ -45,6 +46,25 @@ export function ProfileDetails() {
     queryFn: () => getUserPosts(profileData!.id),
     enabled: !!profileData?.id,
   });
+
+  const { data: donationData, isLoading: isDonationLoading } = useQuery({
+    queryKey: ["donation-history"],
+    queryFn: getDonationHistory,
+    enabled: !!profileData?.id && profileData.role === "USER",
+  });
+
+  const donationCount = donationData?.data?.length || 0;
+
+  const getDonorRank = (count: number) => {
+    if (count >= 20) return { label: "Hero Donor", color: "bg-red-600", icon: <Crown className="w-3.5 h-3.5" /> };
+    if (count >= 10) return { label: "Gold Donor", color: "bg-amber-500", icon: <Medal className="w-3.5 h-3.5" /> };
+    if (count >= 5) return { label: "Silver Donor", color: "bg-slate-400", icon: <Award className="w-3.5 h-3.5" /> };
+    if (count >= 3) return { label: "Bronze Donor", color: "bg-orange-400", icon: <Star className="w-3.5 h-3.5" /> };
+    if (count >= 1) return { label: "Rising Donor", color: "bg-blue-500", icon: <Trophy className="w-3.5 h-3.5" /> };
+    return { label: "Newbie Donor", color: "bg-gray-400", icon: <User className="w-3.5 h-3.5" /> };
+  };
+
+  const rank = getDonorRank(donationCount);
 
   if (isLoading) {
     return (
@@ -91,9 +111,13 @@ export function ProfileDetails() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-2xl font-bold">{user.donorProfile?.name}</h2>
                       <Badge variant="secondary" className="bg-primary/10 text-primary border-0">Donor</Badge>
+                      <Badge className={`${rank.color} text-white border-0 flex items-center gap-1.5 px-3 py-1 shadow-sm`}>
+                         {rank.icon}
+                         {rank.label}
+                      </Badge>
                     </div>
                     <p className="text-muted-foreground flex items-center gap-1 mt-1">
                       <Mail className="w-3.5 h-3.5" /> {user.email}

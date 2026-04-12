@@ -20,7 +20,29 @@ import {
   Calendar,
   Timer,
   X,
+  MoreVertical,
+  Pencil,
+  Trash2,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { deletePost } from "@/services/post.service";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { EditPostModal } from "./EditPostModal";
 import Image from "next/image";
 import { formatDistanceToNow, format } from "date-fns";
 import { LikeAction } from "./LikeAction";
@@ -206,6 +228,27 @@ export function PostCard({ post }: PostCardProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuthContext();
+  const queryClient = useQueryClient();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Mutation for deleting a post
+  const deleteMutation = useMutation({
+    mutationFn: (postId: string) => deletePost(postId),
+    onSuccess: () => {
+      toast.success("Post deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to delete post");
+    },
+  });
+
+  const handleDelete = () => {
+    deleteMutation.mutate(post.id);
+    setIsDeleteDialogOpen(false);
+  };
 
   // Extract correct author name based on role
   const authorName =
@@ -330,10 +373,63 @@ export function PostCard({ post }: PostCardProps) {
                 )}
               </div>
             </div>
+            
+            {/* Options Menu for Author */}
+            {user?.id === post.authorId && (
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem 
+                      className="cursor-pointer gap-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditModalOpen(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" /> Edit Post
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsDeleteDialogOpen(true)
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete Post
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
             <span className="text-[11px] text-muted-foreground whitespace-nowrap mt-0.5 shrink-0">
               {timeAgo}
             </span>
           </div>
+
+          {/* Delete Confirmation Dialog */}
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete your post
+                  and remove it from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Location moved to header for cleanliness */}
           {(post.location || post.district || post.division) && (
@@ -494,6 +590,15 @@ export function PostCard({ post }: PostCardProps) {
           </div>
         </Button>
       </CardFooter>
+
+      {/* Edit Post Modal */}
+      {isEditModalOpen && (
+        <EditPostModal 
+          post={post}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
     </Card>
   );
 }

@@ -66,3 +66,13 @@ export const getUserPosts = async (userId: string): Promise<any> => {
   const response = await axiosInstance.get(`/posts/user/${userId}`);
   return response.data;
 };
+
+export const updatePost = async (id: string, payload: Partial<ICreatePostPayload>): Promise<any> => {
+  const response = await axiosInstance.patch(`/posts/${id}`, payload);
+  return response.data;
+};
+
+export const deletePost = async (id: string): Promise<any> => {
+  const response = await axiosInstance.delete(`/posts/${id}`);
+  return response.data;
+};

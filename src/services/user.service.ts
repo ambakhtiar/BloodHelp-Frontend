@@ -22,3 +22,11 @@ export const updateMyProfile = async (
   );
   return response.data;
 };
+
+/**
+ * Fetches the donation history for the current authenticated user
+ */
+export const getDonationHistory = async (): Promise<ApiResponse<any[]>> => {
+  const response = await axiosInstance.get<ApiResponse<any[]>>("/users/donation-history");
+  return response.data;
+};

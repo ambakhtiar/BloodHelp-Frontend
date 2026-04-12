@@ -75,11 +75,10 @@ axiosInstance.interceptors.response.use(
     };
 
     const isUnauthorized = error.response?.status === 401;
-    const isNotRefreshEndpoint = !originalRequest?.url?.includes(
-      "/auth/refresh-token"
-    );
+    const isNotRefreshEndpoint = !originalRequest?.url?.includes("/auth/refresh-token");
+    const isNotLoginEndpoint = !originalRequest?.url?.includes("/auth/login");
 
-    if (isUnauthorized && isNotRefreshEndpoint && !originalRequest._retry) {
+    if (isUnauthorized && isNotRefreshEndpoint && isNotLoginEndpoint && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
