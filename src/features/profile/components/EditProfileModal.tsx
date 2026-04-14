@@ -97,7 +97,15 @@ export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProp
       }
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Something went wrong while updating");
+      const data = error?.response?.data;
+      if (data?.errorSources && Array.isArray(data.errorSources)) {
+        // Show first 3 errors to avoid toast spam
+        data.errorSources.slice(0, 3).forEach((source: any) => {
+          toast.error(`${source.path}: ${source.message}`);
+        });
+      } else {
+        toast.error(data?.message || "Something went wrong while updating");
+      }
     },
   });
 

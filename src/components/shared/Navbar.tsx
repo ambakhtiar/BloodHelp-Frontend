@@ -12,6 +12,8 @@ import {
   ChevronDown,
   PlusCircle,
   ClipboardList,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import ThemeToggle from "./ThemeToggle";
@@ -166,16 +168,28 @@ export default function Navbar() {
                       </>
                     )}
                     {user.role === "ORGANISATION" && (
-                      <button
-                        onClick={() => {
-                          setUserMenuOpen(false);
-                          router.push("/organisation/volunteers");
-                        }}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
-                      >
-                        <User className="h-4 w-4" />
-                        Members/Volunteers
-                      </button>
+                      <>
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            router.push("/organisation/volunteers");
+                          }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+                        >
+                          <Users className="h-4 w-4" />
+                          Manage Volunteers
+                        </button>
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            router.push("/organisation/volunteers/add");
+                          }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+                        >
+                          <UserPlus className="h-4 w-4" />
+                          Add Volunteer
+                        </button>
+                      </>
                     )}
                     {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
                       <button
@@ -303,14 +317,24 @@ export default function Navbar() {
                     </>
                   )}
                   {user.role === "ORGANISATION" && (
-                    <Link
-                      href="/organisation/volunteers"
-                      className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <User className="h-4 w-4" />
-                      Members/Volunteers
-                    </Link>
+                    <>
+                      <Link
+                        href="/organisation/volunteers"
+                        className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <Users className="h-4 w-4" />
+                        Manage Volunteers
+                      </Link>
+                      <Link
+                        href="/organisation/volunteers/add"
+                        className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        Add Volunteer
+                      </Link>
+                    </>
                   )}
                   {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
                     <Link

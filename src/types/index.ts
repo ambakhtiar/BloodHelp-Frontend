@@ -168,6 +168,28 @@ export interface IRecordDonationPayload {
   postContent?: string;
 }
 
+export interface IOrganisationVolunteer {
+  id: string;
+  organisationId: string;
+  bloodDonorId: string;
+  status: RequestStatus;
+  isDeleted: boolean;
+  createdAt: string;
+  bloodDonor: IBloodDonor;
+}
+
+export interface IAddVolunteerPayload {
+  name: string;
+  contactNumber: string;
+  bloodGroup: BloodGroup | "";
+  gender: Gender | "";
+  lastDonationDate?: string;
+  isAvailable: boolean;
+  division?: string;
+  district?: string;
+  upazila?: string;
+}
+
 // ---------- Auth ----------
 export interface ILoginPayload {
   contactNumber?: string;

@@ -160,13 +160,15 @@ export function DonorCard({ donor }: DonorCardProps) {
               <AlertTriangle className="h-6 w-6" /> 
               সতর্কতা / Warning
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4 pt-2 text-sm leading-relaxed">
-              <p className="text-foreground font-semibold text-base border-l-4 border-destructive pl-4 py-1">
-                রক্তের প্রয়োজন ছাড়া কাউকে কল দিবেন না অথবা কাউকে বিরক্ত করার অভিযোগ আসলে আইনানুগ ব্যবস্থা নেওয়া হবে।
-              </p>
-              <p className="text-muted-foreground opacity-90 border-l-4 border-muted pl-4 py-1">
-                Please do not call anyone without a genuine need for blood. Legal action will be taken if there are any complaints of harassment.
-              </p>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 pt-2 text-sm leading-relaxed">
+                <p className="text-foreground font-semibold text-base border-l-4 border-destructive pl-4 py-1">
+                  রক্তের প্রয়োজন ছাড়া কাউকে কল দিবেন না অথবা কাউকে বিরক্ত করার অভিযোগ আসলে আইনানুগ ব্যবস্থা নেওয়া হবে।
+                </p>
+                <p className="text-muted-foreground opacity-90 border-l-4 border-muted pl-4 py-1">
+                  Please do not call anyone without a genuine need for blood. Legal action will be taken if there are any complaints of harassment.
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4 gap-2 sm:gap-0">
