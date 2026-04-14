@@ -49,7 +49,7 @@ export default function AddVolunteerForm() {
     },
   });
 
-  const form = useForm<IAddVolunteerPayload>({
+  const form = useForm({
     defaultValues: {
       name: "",
       contactNumber: "+880",

@@ -15,10 +15,10 @@ export const addVolunteerSchema = z.object({
     .string()
     .regex(/^(\+88)?01[3-9]\d{8}$/, "Valid BD contact number is required"),
   bloodGroup: z.enum(bloodGroupValues, {
-    errorMap: () => ({ message: "Blood group is required" }),
+    message: "Blood group is required",
   }),
   gender: z.enum(genderValues, {
-    errorMap: () => ({ message: "Gender is required" }),
+    message: "Gender is required",
   }),
   lastDonationDate: z.string().optional(),
   isAvailable: z.boolean().default(true),

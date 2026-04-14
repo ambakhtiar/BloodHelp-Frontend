@@ -99,6 +99,7 @@ export interface IBloodDonor {
   district: string;
   upazila: string;
   area: string | null;
+  userId: string | null;
 }
 
 // ---------- Post ----------
@@ -234,4 +235,25 @@ export interface IRegisterPayload {
     district: string;
     upazila: string;
   };
+}
+
+// ---------- Admin Analytics ----------
+export interface IAdminAnalytics {
+  totalUsers: number;
+  totalPosts: number;
+  totalBloodDonors: number;
+  totalDonationHistories: number;
+  totalHospital: number;
+  pendingHospital: number;
+  rejectedHospital: number;
+  activeHospital: number;
+  blockedHospital: number;
+  totalOrg: number;
+  pendingOrg: number;
+  rejectedOrg: number;
+  activeOrg: number;
+  blockedOrg: number;
+  totalStandardUser: number;
+  blockedUser: number;
+  rejectedUser: number;
 }

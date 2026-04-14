@@ -45,6 +45,15 @@ const GENDERS: { label: string; value: Gender }[] = [
   { label: "Female", value: "FEMALE" },
 ];
 
+interface EditVolunteerFormValues {
+  name: string;
+  bloodGroup: BloodGroup | undefined;
+  gender: Gender | undefined;
+  division: string;
+  district: string;
+  upazila: string;
+}
+
 export default function EditVolunteerModal({ isOpen, onClose, volunteer }: EditVolunteerModalProps) {
   const queryClient = useQueryClient();
 
@@ -69,11 +78,11 @@ export default function EditVolunteerModal({ isOpen, onClose, volunteer }: EditV
     },
   });
 
-  const form = useForm<Partial<IAddVolunteerPayload>>({
+  const form = useForm({
     defaultValues: {
       name: "",
-      bloodGroup: undefined,
-      gender: undefined,
+      bloodGroup: undefined as BloodGroup | undefined,
+      gender: undefined as Gender | undefined,
       division: "",
       district: "",
       upazila: "",

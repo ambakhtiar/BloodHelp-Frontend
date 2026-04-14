@@ -52,7 +52,7 @@ export default function UpdateDonationDateModal({
     },
   });
 
-  const form = useForm<UpdateDateFormValues>({
+  const form = useForm({
     defaultValues: {
       donationDate: "",
     },
