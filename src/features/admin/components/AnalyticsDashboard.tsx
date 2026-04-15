@@ -53,6 +53,13 @@ export default function AnalyticsDashboard() {
         </h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard 
+                title="Total Admins" 
+                value={data?.totalAdmin} 
+                icon={ShieldCheck} 
+                description="Administrative accounts"
+                color="indigo"
+            />
+            <StatCard 
                 title="Total Users" 
                 value={data?.totalUsers} 
                 icon={Users} 
@@ -146,14 +153,15 @@ export default function AnalyticsDashboard() {
 
 function StatCard({ title, value, icon: Icon, description, color }: any) {
   const colorMap: any = {
-    blue: "text-blue-600 bg-blue-100",
-    red: "text-red-600 bg-red-100",
-    purple: "text-purple-600 bg-purple-100",
-    green: "text-green-600 bg-green-100",
-    amber: "text-amber-600 bg-amber-100",
-    cyan: "text-cyan-600 bg-cyan-100",
-    slate: "text-slate-600 bg-slate-100",
-    rose: "text-rose-600 bg-rose-100",
+    blue: "text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400",
+    red: "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400",
+    purple: "text-purple-600 bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400",
+    green: "text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400",
+    amber: "text-amber-600 bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400",
+    cyan: "text-cyan-600 bg-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-400",
+    slate: "text-slate-600 bg-slate-100 dark:bg-slate-900/20 dark:text-slate-400",
+    rose: "text-rose-600 bg-rose-100 dark:bg-rose-900/20 dark:text-rose-400",
+    indigo: "text-indigo-600 bg-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400",
   };
 
   return (
@@ -197,38 +205,38 @@ function EntitySection({ title, icon: Icon, total, pending, active, rejected, bl
                 <div className="grid grid-cols-2 gap-4">
                     <div className={cn(
                         "p-4 rounded-2xl border transition-all",
-                        hasPending ? "bg-amber-50 border-amber-200" : "bg-muted/20 border-transparent"
+                        hasPending ? "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/50" : "bg-muted/20 border-transparent"
                     )}>
                         <div className="flex items-center justify-between mb-2">
-                            <Clock className={cn("w-4 h-4", hasPending ? "text-amber-600" : "text-slate-400")} />
+                            <Clock className={cn("w-4 h-4", hasPending ? "text-amber-600 dark:text-amber-400" : "text-slate-400")} />
                             <Badge variant={hasPending ? "default" : "outline"} className={hasPending ? "bg-amber-500 hover:bg-amber-600" : ""}>Pending</Badge>
                         </div>
                         <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">{pending || 0}</div>
                         <p className="text-[10px] text-muted-foreground font-medium uppercase mt-1">Awaiting Approval</p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-green-50 border border-green-100">
+                    <div className="p-4 rounded-2xl bg-green-50 border border-green-100 dark:bg-green-950/20 dark:border-green-900/50">
                         <div className="flex items-center justify-between mb-2">
-                            <ShieldCheck className="w-4 h-4 text-green-600" />
-                            <Badge variant="outline" className="text-green-600 border-green-200">Active</Badge>
+                            <ShieldCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <Badge variant="outline" className="text-green-600 border-green-200 dark:text-green-400 dark:border-green-900">Active</Badge>
                         </div>
                         <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">{active || 0}</div>
                         <p className="text-[10px] text-muted-foreground font-medium uppercase mt-1">Verified Entities</p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-rose-50 border border-rose-100">
+                    <div className="p-4 rounded-2xl bg-rose-50 border border-rose-100 dark:bg-rose-950/20 dark:border-rose-900/50">
                         <div className="flex items-center justify-between mb-2">
-                            <AlertCircle className="w-4 h-4 text-rose-600" />
-                            <Badge variant="outline" className="text-rose-600 border-rose-200">Rejected</Badge>
+                            <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                            <Badge variant="outline" className="text-rose-600 border-rose-200 dark:text-rose-400 dark:border-rose-900">Rejected</Badge>
                         </div>
                         <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">{rejected || 0}</div>
                         <p className="text-[10px] text-muted-foreground font-medium uppercase mt-1">Denied Access</p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-slate-100 border border-slate-200">
+                    <div className="p-4 rounded-2xl bg-slate-100 border border-slate-200 dark:bg-slate-900/40 dark:border-slate-800">
                         <div className="flex items-center justify-between mb-2">
-                            <ShieldAlert className="w-4 h-4 text-slate-600" />
-                            <Badge variant="outline" className="text-slate-600 border-slate-300">Blocked</Badge>
+                            <ShieldAlert className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                            <Badge variant="outline" className="text-slate-600 border-slate-300 dark:text-slate-400 dark:border-slate-800">Blocked</Badge>
                         </div>
                         <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">{blocked || 0}</div>
                         <p className="text-[10px] text-muted-foreground font-medium uppercase mt-1">Suspended Accounts</p>

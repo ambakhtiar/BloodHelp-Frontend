@@ -47,6 +47,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { useAuthContext } from "@/providers/AuthProvider";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface EntityManagementTableProps {
   entityType: "users" | "hospitals" | "organisations";
@@ -54,6 +61,7 @@ interface EntityManagementTableProps {
 
 export default function EntityManagementTable({ entityType }: EntityManagementTableProps) {
   const queryClient = useQueryClient();
+  const { user: currentUser } = useAuthContext();
   
   // State for Filters, Sorting, and Pagination
   const [searchTerm, setSearchTerm] = useState("");
@@ -133,6 +141,28 @@ export default function EntityManagementTable({ entityType }: EntityManagementTa
       setSortBy(field);
       setSortOrder("desc");
     }
+  };
+
+  const isActionRestricted = (targetUser: IUser) => {
+    if (!currentUser) return true;
+    
+    // 1. Cannot act on self
+    if (targetUser.id === currentUser.id) return true;
+
+    // 2. Admins cannot act on other Admins or Super Admins
+    if (currentUser.role === "ADMIN" && (targetUser.role === "ADMIN" || targetUser.role === "SUPER_ADMIN")) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const getRestrictionReason = (targetUser: IUser) => {
+    if (targetUser.id === currentUser?.id) return "You cannot manage your own account status.";
+    if (currentUser?.role === "ADMIN" && (targetUser.role === "ADMIN" || targetUser.role === "SUPER_ADMIN")) {
+      return "You do not have permission to manage other administrative accounts.";
+    }
+    return "";
   };
 
   const entities = response?.data || [];
@@ -278,41 +308,58 @@ export default function EntityManagementTable({ entityType }: EntityManagementTa
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuLabel>Manage Status</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => mutation.mutate({ id: entity.id, status: "ACTIVE" })}
-                        disabled={entity.accountStatus === "ACTIVE" || mutation.isPending}
-                        className="cursor-pointer"
-                      >
-                        <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                        <span>Approve / Active</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => mutation.mutate({ id: entity.id, status: "REJECTED" })}
-                        disabled={entity.accountStatus === "REJECTED" || mutation.isPending}
-                        className="cursor-pointer"
-                      >
-                        <XCircle className="mr-2 h-4 w-4 text-rose-500" />
-                        <span>Reject Account</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => mutation.mutate({ id: entity.id, status: "BLOCKED" })}
-                        disabled={entity.accountStatus === "BLOCKED" || mutation.isPending}
-                        className="cursor-pointer"
-                      >
-                        <Ban className="mr-2 h-4 w-4 text-orange-500" />
-                        <span>Block User</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <TooltipProvider>
+                    <Tooltip delayDuration={300}>
+                      <TooltipTrigger asChild>
+                        <div className="inline-block">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                className="h-8 w-8 p-0"
+                                disabled={isActionRestricted(entity)}
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuLabel>Manage Status</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => mutation.mutate({ id: entity.id, status: "ACTIVE" })}
+                                disabled={entity.accountStatus === "ACTIVE" || mutation.isPending}
+                                className="cursor-pointer"
+                              >
+                                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                                <span>Approve / Active</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => mutation.mutate({ id: entity.id, status: "REJECTED" })}
+                                disabled={entity.accountStatus === "REJECTED" || mutation.isPending}
+                                className="cursor-pointer"
+                              >
+                                <XCircle className="mr-2 h-4 w-4 text-rose-500" />
+                                <span>Reject Account</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => mutation.mutate({ id: entity.id, status: "BLOCKED" })}
+                                disabled={entity.accountStatus === "BLOCKED" || mutation.isPending}
+                                className="cursor-pointer"
+                              >
+                                <Ban className="mr-2 h-4 w-4 text-orange-500" />
+                                <span>Block User</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TooltipTrigger>
+                      {isActionRestricted(entity) && (
+                        <TooltipContent side="left" className="bg-destructive text-destructive-foreground">
+                          <p className="text-xs font-medium">{getRestrictionReason(entity)}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
                 </TableCell>
               </TableRow>
             ))

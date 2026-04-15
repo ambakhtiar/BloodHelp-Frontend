@@ -4,12 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { 
-  LayoutDashboard, 
-  Building2, 
-  Users, 
   Heart,
-  Droplets
+  Droplets,
+  ShieldCheck,
+  Settings as SettingsLogo,
+  LayoutDashboard,
+  Building2,
+  Users
 } from "lucide-react";
+import { useAuthContext } from "@/providers/AuthProvider";
 
 const mainNavItems = [
   {
@@ -32,14 +35,7 @@ const mainNavItems = [
     href: "/admin/users",
     icon: Users,
   },
-  {
-    title: "Settings",
-    href: "/admin/settings",
-    icon: SettingsLogo,
-  },
 ];
-
-import { Settings as SettingsLogo } from "lucide-react";
 
 interface AdminSidebarProps {
   className?: string;
@@ -48,6 +44,7 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ className, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuthContext();
 
   return (
     <div className={cn("pb-12 h-screen border-r bg-card", className)}>
@@ -74,6 +71,38 @@ export default function AdminSidebar({ className, onClose }: AdminSidebarProps) 
                 <span>{item.title}</span>
               </Link>
             ))}
+
+            {/* Manage Posts - Accessible to all admins */}
+            <Link
+              href="/admin/manage-posts"
+              onClick={onClose}
+              className={cn(
+                "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
+                pathname === "/admin/manage-posts"
+                  ? "bg-primary/10 text-primary shadow-sm"
+                  : "transparent text-muted-foreground"
+              )}
+            >
+              <Droplets className="mr-2 h-4 w-4" />
+              <span>Manage Posts</span>
+            </Link>
+
+            {/* Manage Admins - SUPER_ADMIN ONLY */}
+            {user?.role === "SUPER_ADMIN" && (
+              <Link
+                href="/admin/manage-admins"
+                onClick={onClose}
+                className={cn(
+                  "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
+                  pathname === "/admin/manage-admins"
+                    ? "bg-primary/10 text-primary shadow-sm"
+                    : "transparent text-muted-foreground"
+                )}
+              >
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                <span>Manage Admins</span>
+              </Link>
+            )}
           </div>
         </div>
       <div className="mt-auto px-3 py-2 border-t">

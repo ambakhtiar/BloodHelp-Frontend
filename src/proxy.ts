@@ -41,6 +41,11 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/feed', request.url));
       }
 
+      // Restrict manage-admins specifically to SUPER_ADMIN
+      if (pathname.startsWith('/admin/manage-admins') && role !== 'SUPER_ADMIN') {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+
       if (isHospitalRoute && role !== 'HOSPITAL') {
         return NextResponse.redirect(new URL('/feed', request.url));
       }

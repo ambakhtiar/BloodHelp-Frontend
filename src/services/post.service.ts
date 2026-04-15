@@ -9,6 +9,8 @@ export interface IPostFilters {
   district?: string;
   upazila?: string;
   isResolved?: boolean;
+  isApproved?: boolean;
+  isVerified?: boolean;
   hasLiked?: boolean;
   page?: number;
   limit?: number;
@@ -62,6 +64,16 @@ export const getPostComments = async (postId: string): Promise<any> => {
   return response.data;
 };
 
+export const editComment = async (commentId: string, payload: { content: string }): Promise<any> => {
+  const response = await axiosInstance.patch(`/posts/engagement/comment/${commentId}`, payload);
+  return response.data;
+};
+
+export const deleteComment = async (commentId: string): Promise<any> => {
+  const response = await axiosInstance.delete(`/posts/engagement/comment/${commentId}`);
+  return response.data;
+};
+
 export const getUserPosts = async (userId: string): Promise<any> => {
   const response = await axiosInstance.get(`/posts/user/${userId}`);
   return response.data;
@@ -79,5 +91,20 @@ export const deletePost = async (id: string): Promise<any> => {
 
 export const resolvePost = async (id: string): Promise<any> => {
   const response = await axiosInstance.patch(`/posts/${id}/resolve`);
+  return response.data;
+};
+
+export const approvePost = async (id: string): Promise<any> => {
+  const response = await axiosInstance.patch(`/posts/${id}/approve`);
+  return response.data;
+};
+
+export const verifyPost = async (id: string): Promise<any> => {
+  const response = await axiosInstance.patch(`/posts/${id}/verify`);
+  return response.data;
+};
+
+export const toggleDeletePost = async (id: string): Promise<any> => {
+  const response = await axiosInstance.patch(`/posts/${id}/toggle-delete`);
   return response.data;
 };
