@@ -21,6 +21,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   setUser: (user: IUser | null) => void;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 // ---------- Context ----------
@@ -94,12 +95,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [router]);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const currentUser = await fetchCurrentUser();
+      setUser(currentUser);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user,
     setUser,
     logout,
+    refreshUser,
   };
 
   // Block render until auth is resolved — prevents flickering

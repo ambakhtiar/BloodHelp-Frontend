@@ -5,6 +5,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import AppProviders from "@/providers/AppProviders";
+import PasswordChangeGuard from "@/components/shared/PasswordChangeGuard";
 
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
@@ -27,7 +28,9 @@ export default function RootLayout({
     <html lang="en" className={cn("h-full", "font-sans", geist.variable)} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col antialiased">
         <AppProviders>
-          {children}
+          <PasswordChangeGuard>
+            {children}
+          </PasswordChangeGuard>
         </AppProviders>
         <Toaster richColors position="top-right" />
       </body>

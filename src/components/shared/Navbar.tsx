@@ -14,6 +14,7 @@ import {
   ClipboardList,
   UserPlus,
   Users,
+  Settings as SettingsIcon
 } from "lucide-react";
 import { Button } from "../ui/button";
 import ThemeToggle from "./ThemeToggle";
@@ -207,6 +208,21 @@ export default function Navbar() {
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
+                        const settingsPath = 
+                          user.role === "HOSPITAL" ? "/hospital/settings" :
+                          user.role === "ORGANISATION" ? "/organisation/settings" :
+                          (user.role === "ADMIN" || user.role === "SUPER_ADMIN") ? "/admin/settings" :
+                          "/profile/settings";
+                        router.push(settingsPath);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+                    >
+                      <SettingsIcon className="h-4 w-4" />
+                      Settings
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
                         router.push("/profile");
                       }}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
@@ -276,6 +292,19 @@ export default function Navbar() {
                       {displayName}
                     </span>
                   </div>
+                  <Link
+                    href={
+                      user.role === "HOSPITAL" ? "/hospital/settings" :
+                      user.role === "ORGANISATION" ? "/organisation/settings" :
+                      (user.role === "ADMIN" || user.role === "SUPER_ADMIN") ? "/admin/settings" :
+                      "/profile/settings"
+                    }
+                    className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <SettingsIcon className="h-4 w-4" />
+                    Settings
+                  </Link>
                   <Link
                     href="/profile"
                     className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"

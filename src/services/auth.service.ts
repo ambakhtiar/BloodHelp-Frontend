@@ -84,3 +84,9 @@ export const resetPasswordApi = async (payload: { id: string; token: string; new
   const response = await axiosInstance.post("/auth/reset-password", payload);
   return response.data;
 };
+
+// ---------- Change Password ----------
+export const changePasswordApi = async (payload: any): Promise<any> => {
+  const response = await axiosInstance.post("/auth/change-password", payload);
+  return response.data;
+};

@@ -32,7 +32,14 @@ const mainNavItems = [
     href: "/admin/users",
     icon: Users,
   },
+  {
+    title: "Settings",
+    href: "/admin/settings",
+    icon: SettingsLogo,
+  },
 ];
+
+import { Settings as SettingsLogo } from "lucide-react";
 
 interface AdminSidebarProps {
   className?: string;
