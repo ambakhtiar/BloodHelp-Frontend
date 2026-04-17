@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Menu,
   X,
@@ -39,7 +39,8 @@ function getUserDisplayName(
     user.organisation?.name ||
     user.admin?.name ||
     user.email?.split("@")[0] ||
-    user.contactNumber
+    user.contactNumber ||
+    "User"
   );
 }
 
@@ -48,6 +49,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const displayName = getUserDisplayName(user);
 
@@ -66,22 +68,31 @@ export default function Navbar() {
             <Droplets className="h-5 w-5" />
           </div>
           <span className="text-xl font-bold tracking-tight">
-            Blood<span className="text-primary">Link</span>
+            {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>
           </span>
         </Link>
 
         {/* Desktop Links */}
         <ul className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="relative px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground rounded-md hover:bg-accent"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+            return (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-md ${isActive
+                      ? "text-primary bg-primary/10 font-bold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    }`}
+                >
+                  {link.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary rounded-t-lg" />
+                  )}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
 
         {/* Desktop Right */}
@@ -210,11 +221,11 @@ export default function Navbar() {
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
-                        const settingsPath = 
+                        const settingsPath =
                           user.role === "HOSPITAL" ? "/hospital/settings" :
-                          user.role === "ORGANISATION" ? "/organisation/settings" :
-                          (user.role === "ADMIN" || user.role === "SUPER_ADMIN") ? "/admin/settings" :
-                          "/profile/settings";
+                            user.role === "ORGANISATION" ? "/organisation/settings" :
+                              (user.role === "ADMIN" || user.role === "SUPER_ADMIN") ? "/admin/settings" :
+                                "/profile/settings";
                         router.push(settingsPath);
                       }}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
@@ -278,16 +289,22 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                onClick={() => setMobileOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${isActive
+                      ? "bg-primary/10 text-primary font-bold border-l-4 border-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground border-l-4 border-transparent"
+                    }`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
 
             <div className="pt-3 border-t border-border/40 space-y-2">
               {isAuthenticated && user ? (
@@ -301,9 +318,9 @@ export default function Navbar() {
                   <Link
                     href={
                       user.role === "HOSPITAL" ? "/hospital/settings" :
-                      user.role === "ORGANISATION" ? "/organisation/settings" :
-                      (user.role === "ADMIN" || user.role === "SUPER_ADMIN") ? "/admin/settings" :
-                      "/profile/settings"
+                        user.role === "ORGANISATION" ? "/organisation/settings" :
+                          (user.role === "ADMIN" || user.role === "SUPER_ADMIN") ? "/admin/settings" :
+                            "/profile/settings"
                     }
                     className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
                     onClick={() => setMobileOpen(false)}

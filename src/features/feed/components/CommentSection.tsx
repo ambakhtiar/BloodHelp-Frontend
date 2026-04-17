@@ -25,7 +25,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useAuthContext } from "@/providers/AuthProvider";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface CommentSectionProps {
   postId: string;
@@ -35,6 +35,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
   const queryClient = useQueryClient();
   const { user } = useAuthContext();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
@@ -48,13 +49,55 @@ export function CommentSection({ postId }: CommentSectionProps) {
     queryFn: () => getPostComments(postId),
   });
 
+  const updateCommentCount = (increment: number) => {
+    queryClient.setQueriesData({ queryKey: ["posts"] }, (oldData: any) => {
+      if (!oldData?.pages) return oldData;
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page: any) => ({
+          ...page,
+          data: page.data?.map((p: any) => {
+            if (p.id === postId) {
+              return {
+                ...p,
+                _count: {
+                  ...p._count,
+                  comments: Math.max(0, (p._count?.comments || 0) + increment),
+                },
+              };
+            }
+            return p;
+          }),
+        })),
+      };
+    });
+
+    queryClient.setQueryData(["post", postId], (oldData: any) => {
+      if (!oldData?.data) return oldData;
+      return {
+        ...oldData,
+        data: {
+          ...oldData.data,
+          _count: {
+            ...oldData.data._count,
+            comments: Math.max(0, (oldData.data._count?.comments || 0) + increment),
+          },
+        }
+      };
+    });
+  };
+
   const mutation = useMutation({
     mutationFn: (payload: ICommentPayload) => addComment(payload),
     onSuccess: (response, variables) => {
       setNewComment("");
       setReplyTo(null);
+      // Instant UI update
+      updateCommentCount(1);
+      
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
 
       const successMessage = variables.parentId
         ? "Reply added successfully!"
@@ -82,6 +125,9 @@ export function CommentSection({ postId }: CommentSectionProps) {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteComment(id),
     onSuccess: () => {
+      // Instant UI update
+      updateCommentCount(-1);
+      
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
@@ -98,7 +144,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
     e.preventDefault();
     if (!user) {
       toast.error("Please login to comment");
-      router.push("/login");
+      router.push(`/auth/login?callbackUrl=/feed/${postId}`);
       return;
     }
     if (!newComment.trim()) return;
@@ -148,22 +194,23 @@ export function CommentSection({ postId }: CommentSectionProps) {
                     )}
                   </div>
                   <div className="relative flex-1 bg-secondary/30 p-4 rounded-2xl rounded-tl-none border border-primary/10 shadow-sm">
-                    <div className="flex flex-wrap justify-between items-start gap-x-4 gap-y-1 mb-1.5">
-                      <span className="font-bold text-[13px] md:text-sm text-primary/90 leading-tight">
-                        {commenterName}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-medium shrink-0">
-                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                      </span>
+                    <div className="flex justify-between items-start mb-1.5 pr-2">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-bold text-[13px] md:text-sm text-primary/90 leading-tight">
+                          {commenterName}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-medium">
+                          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                        </span>
+                      </div>
                       
                       {(user?.id === comment.userId || user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') && (
-                        <div className="absolute top-2 right-2">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button className="text-muted-foreground hover:bg-black/5 p-1 rounded-md">
-                                <MoreVertical className="h-3 w-3" />
-                              </button>
-                            </DropdownMenuTrigger>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="text-muted-foreground hover:bg-black/5 p-1 rounded-md ml-2 shrink-0">
+                              <MoreVertical className="h-3 w-3" />
+                            </button>
+                          </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               {user?.id === comment.userId && (
                                 <DropdownMenuItem onClick={() => {
@@ -180,7 +227,6 @@ export function CommentSection({ postId }: CommentSectionProps) {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </div>
                       )}
                     </div>
                     
@@ -234,15 +280,20 @@ export function CommentSection({ postId }: CommentSectionProps) {
                             )}
                           </div>
                           <div className="relative flex-1 bg-primary/5 p-2.5 rounded-xl rounded-tl-none">
-                            <div className="flex justify-between items-baseline mb-0.5">
-                              <span className="font-bold text-[11px] text-primary/70">
-                                {replyName}
-                              </span>
+                            <div className="flex justify-between items-start mb-0.5 pr-1">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-[11px] text-primary/70">
+                                  {replyName}
+                                </span>
+                                <span className="text-[9px] text-muted-foreground">
+                                  {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true })}
+                                </span>
+                              </div>
                               
                               {(user?.id === reply.userId || user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <button className="text-muted-foreground hover:bg-black/5 p-0.5 rounded-md">
+                                    <button className="text-muted-foreground hover:bg-black/5 p-0.5 rounded-md ml-1 shrink-0">
                                       <MoreVertical className="h-3 w-3" />
                                     </button>
                                   </DropdownMenuTrigger>

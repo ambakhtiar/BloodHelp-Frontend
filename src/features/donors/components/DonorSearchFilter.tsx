@@ -26,6 +26,10 @@ export interface DonorFilterValues {
   division?: string;
   district?: string;
   upazila?: string;
+  startDate?: string;
+  endDate?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }
 
 interface DonorSearchFilterProps {
@@ -41,6 +45,10 @@ export function DonorSearchFilter({ onFilterChange, isFetching }: DonorSearchFil
       division: "",
       district: "",
       upazila: "",
+      startDate: "",
+      endDate: "",
+      sortBy: "createdAt",
+      sortOrder: "desc"
     },
     onSubmit: async ({ value }) => {
       onFilterChange(value);
@@ -70,7 +78,7 @@ export function DonorSearchFilter({ onFilterChange, isFetching }: DonorSearchFil
           }}
           className="space-y-6"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
             
             {/* SEARCH TERM */}
             <form.Field
@@ -199,6 +207,80 @@ export function DonorSearchFilter({ onFilterChange, isFetching }: DonorSearchFil
                     {upazilas.map((u) => (
                       <option key={u} value={u}>{u}</option>
                     ))}
+                  </select>
+                </div>
+              )}
+            />
+
+            {/* START DATE */}
+            <form.Field
+              name="startDate"
+              children={(field) => (
+                <div className="space-y-1">
+                  <label className={labelClass} htmlFor={field.name}>
+                    <RefreshCcw className="w-3.5 h-3.5 opacity-50" /> Joined After
+                  </label>
+                  <Input
+                    type="date"
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    className="bg-background/80"
+                  />
+                </div>
+              )}
+            />
+
+            {/* END DATE */}
+            <form.Field
+              name="endDate"
+              children={(field) => (
+                <div className="space-y-1">
+                  <label className={labelClass} htmlFor={field.name}>
+                    <RefreshCcw className="w-3.5 h-3.5 opacity-50" /> Joined Before
+                  </label>
+                  <Input
+                    type="date"
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    className="bg-background/80"
+                  />
+                </div>
+              )}
+            />
+
+            {/* SORT BY */}
+            <form.Field
+              name="sortBy"
+              children={(field) => (
+                <div className="space-y-1">
+                  <label className={labelClass} htmlFor="sortBy">
+                    <RefreshCcw className="w-3.5 h-3.5 opacity-50" /> Sort By
+                  </label>
+                  <select
+                    id={field.name}
+                    name={field.name}
+                    value={`${field.state.value}-${form.getFieldValue('sortOrder')}`}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val) {
+                        const [by, order] = val.split('-');
+                        field.handleChange(by);
+                        form.setFieldValue('sortOrder', order);
+                      }
+                    }}
+                    className={selectClass}
+                  >
+                    <option value="createdAt-desc">Newly Joined</option>
+                    <option value="createdAt-asc">Oldest Joined</option>
+                    <option value="lastDonationDate-asc">Last Donation (Oldest)</option>
+                    <option value="lastDonationDate-desc">Last Donation (Recent)</option>
                   </select>
                 </div>
               )}

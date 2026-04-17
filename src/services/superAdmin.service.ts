@@ -1,8 +1,8 @@
 import { ApiResponse, ICreateAdminPayload, IManageAdminResponse, IUpdateAdminPayload } from "@/types";
 import axiosInstance from "@/lib/axiosInstance";
 
-const getAllAdmins = async (): Promise<ApiResponse<IManageAdminResponse[]>> => {
-  const { data } = await axiosInstance.get("/manage-admins");
+const getAllAdmins = async (params: Record<string, unknown> = {}): Promise<ApiResponse<IManageAdminResponse[]>> => {
+  const { data } = await axiosInstance.get("/manage-admins", { params });
   return data;
 };
 

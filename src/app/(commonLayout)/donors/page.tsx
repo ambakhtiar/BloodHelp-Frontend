@@ -19,29 +19,29 @@ export default function DonorsPage() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
-              <UserCheck className="w-3.5 h-3.5" /> Verified Volunteers
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4 border border-primary/20">
+              <UserCheck className="w-4 h-4" /> Verified Volunteers
             </div>
-            <h1 className="text-4xl md:text-5xl font-black text-foreground mb-4 tracking-tight leading-none">
-              Find <span className="text-primary italic">Life-Savers</span> <br />
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight leading-none">
+              Find <span className="text-primary font-bold">Life-Savers</span> <br />
               Near You.
             </h1>
-            <p className="text-lg text-muted-foreground font-medium max-w-2xl leading-relaxed">
+            <p className="text-lg text-muted-foreground font-normal max-w-2xl leading-relaxed">
               Searching for blood is now easier and faster. Use our advanced filters to find verified donors in your specific area across Bangladesh.
             </p>
 
             <div className="flex flex-wrap gap-6 mt-8">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-sm font-bold text-foreground">Live Database</span>
+                <span className="text-sm font-semibold text-foreground">Live Database</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-sm font-bold text-foreground">8,000+ Potential Donors</span>
+                <span className="text-sm font-semibold text-foreground">8,000+ Potential Donors</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                <span className="text-sm font-bold text-foreground">Verified Contacts</span>
+                <span className="text-sm font-semibold text-foreground">Verified Contacts</span>
               </div>
             </div>
           </div>
@@ -54,13 +54,13 @@ export default function DonorsPage() {
       </div>
 
       {/* FOOTER INFO MESSAGE */}
-      <section className="container mx-auto px-4 mt-20 text-center">
-        <div className="max-w-2xl mx-auto p-8 rounded-3xl bg-secondary/30 border border-primary/5">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
+      <section className="container mx-auto px-4 mt-24 pb-8 text-center">
+        <div className="max-w-2xl mx-auto p-8 rounded-3xl bg-secondary/20 border border-primary/10">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-5 shadow-sm">
             <Heart className="h-6 w-6" />
           </div>
-          <h2 className="text-xl font-black text-foreground mb-2 italic">Be a Hero Today</h2>
-          <p className="text-muted-foreground font-medium mb-6">
+          <h2 className="text-xl font-bold text-foreground mb-3 tracking-tight">Be a Hero Today</h2>
+          <p className="text-muted-foreground font-normal mb-8 leading-relaxed">
             If you're healthy and haven't donated in the last 3-4 months, consider registering as a donor. Your one bag of blood can save up to three lives.
           </p>
           <hr className="border-primary/5 mb-6" />

@@ -7,14 +7,13 @@ const protectedRoutes = {
   hospital: ['/hospital', '/dashboard/hospital'],
   organisation: ['/organisation', '/dashboard/organisation'],
   user: ['/user', '/user/donation-history'],
-  authenticated: ['/profile', '/settings', '/donors'],
+  authenticated: ['/posts/create', '/profile', '/settings', '/donors', '/feed/*'],
 };
 
 export async function proxy(request: NextRequest) {
   const token = request.cookies.get('refreshToken')?.value;
   const pathname = request.nextUrl.pathname;
 
-  // If there's no token, redirect to login if accessing any protected route
   if (!token) {
     const isProtected = Object.values(protectedRoutes).flat().some(route => pathname.startsWith(route));
     if (isProtected) {
@@ -58,8 +57,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/feed', request.url));
       }
 
-      if (isAuthenticatedRoute && role !== 'USER' && role !== 'DONOR') {
-        // Prevent hospital/org/admin from accessing normal user routes
+      if (isAuthenticatedRoute && !role) {
         return NextResponse.redirect(new URL('/feed', request.url));
       }
     }

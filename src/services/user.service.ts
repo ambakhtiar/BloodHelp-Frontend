@@ -8,6 +8,8 @@ export interface DonorFilters {
   district?: string;
   upazila?: string;
   searchTerm?: string;
+  sortBy?: string;
+  sortOrder?: string;
   page?: number;
   limit?: number;
 }
@@ -58,5 +60,13 @@ export const getDonorsList = async (
   const response = await axiosInstance.get<ApiResponse<IUser[]>>(
     `/users/donors?${params.toString()}`
   );
+  return response.data;
+};
+
+/**
+ * Fetches public profile of any user including their posts
+ */
+export const getPublicProfile = async (userId: string): Promise<ApiResponse<any>> => {
+  const response = await axiosInstance.get<ApiResponse<any>>(`/users/${userId}`);
   return response.data;
 };

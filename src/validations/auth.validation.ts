@@ -34,9 +34,9 @@ export const registerSchema = z.discriminatedUnion("role", [
     role: z.literal("USER"),
     bloodGroup: z.enum(
       ["A_POSITIVE", "A_NEGATIVE", "B_POSITIVE", "B_NEGATIVE", "AB_POSITIVE", "AB_NEGATIVE", "O_POSITIVE", "O_NEGATIVE"],
-      { error: "Blood group is required" }
+      { required_error: "Blood group is required", invalid_type_error: "Blood group is required" }
     ),
-    gender: z.enum(["MALE", "FEMALE"], { error: "Gender is required" }),
+    gender: z.enum(["MALE", "FEMALE"], { required_error: "Gender is required", invalid_type_error: "Gender is required" }),
   }),
   z.object({
     ...baseFields,

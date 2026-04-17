@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, AlertTriangle, XCircle } from "lucide-react";
 import { loginSchema } from "@/validations/auth.validation";
@@ -18,6 +18,8 @@ const inputClass =
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const { setUser } = useAuthContext();
   const [formData, setFormData] = useState({ emailOrPhone: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -55,7 +57,7 @@ export function LoginForm() {
         setUser(user);
       } catch { /* will fetch on nav */ }
       toast.success("Logged in successfully!");
-      router.push("/");
+      router.push(callbackUrl || "/");
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || "Login failed, please try again.";

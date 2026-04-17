@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { 
+import {
   Heart,
   Droplets,
   ShieldCheck,
@@ -35,6 +35,11 @@ const mainNavItems = [
     href: "/admin/users",
     icon: Users,
   },
+  {
+    title: "Manage Donors",
+    href: "/admin/donors",
+    icon: Heart,
+  },
 ];
 
 interface AdminSidebarProps {
@@ -52,12 +57,12 @@ export default function AdminSidebar({ className, onClose }: AdminSidebarProps) 
         <div className="px-3 py-2">
           <div className="flex items-center gap-2 px-4 mb-8">
             <Heart className="h-6 w-6 text-primary filled-primary" />
-            <span className="text-xl font-bold tracking-tight">
-              BloodLink{" "}
-              <span className="text-primary/80 text-sm block md:inline font-black uppercase tracking-tighter">
-                {user?.role === "SUPER_ADMIN" ? "Super Admin" : "Admin"}
-              </span>
-            </span>
+            <p className="text-xl font-bold tracking-tight">
+              {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>{" "}
+            </p>
+            <p className="text-sm block md:inline font-bold">
+              {user?.role === "SUPER_ADMIN" ? "Super Admin" : "Admin"}
+            </p>
           </div>
           <div className="space-y-1">
             {mainNavItems.map((item) => (
@@ -77,21 +82,6 @@ export default function AdminSidebar({ className, onClose }: AdminSidebarProps) 
               </Link>
             ))}
 
-            {/* Manage Posts - Accessible to all admins */}
-            <Link
-              href="/admin/manage-posts"
-              onClick={onClose}
-              className={cn(
-                "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
-                pathname === "/admin/manage-posts"
-                  ? "bg-primary/10 text-primary shadow-sm"
-                  : "transparent text-muted-foreground"
-              )}
-            >
-              <Droplets className="mr-2 h-4 w-4" />
-              <span>Manage Posts</span>
-            </Link>
-
             {/* Manage Admins - SUPER_ADMIN ONLY */}
             {user?.role === "SUPER_ADMIN" && (
               <Link
@@ -108,9 +98,25 @@ export default function AdminSidebar({ className, onClose }: AdminSidebarProps) 
                 <span>Manage Admins</span>
               </Link>
             )}
+
+            {/* Manage Posts - Accessible to all admins */}
+            <Link
+              href="/admin/manage-posts"
+              onClick={onClose}
+              className={cn(
+                "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
+                pathname === "/admin/manage-posts"
+                  ? "bg-primary/10 text-primary shadow-sm"
+                  : "transparent text-muted-foreground"
+              )}
+            >
+              <Droplets className="mr-2 h-4 w-4" />
+              <span>Manage Posts</span>
+            </Link>
+
           </div>
         </div>
-      <div className="mt-auto px-3 py-2 border-t">
+        <div className="mt-auto px-3 py-2 border-t">
           <Link
             href="/feed"
             className="group flex items-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"

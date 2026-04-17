@@ -36,6 +36,11 @@ const updateOrganisationStatus = async (id: string, status: AccountStatus): Prom
   return data;
 };
 
+const getDonors = async (params: Record<string, unknown> = {}): Promise<ApiResponse<any[]>> => {
+  const { data } = await axiosInstance.get("/admin/donors", { params });
+  return data;
+};
+
 export const AdminServices = {
   getAnalytics,
   getUsers,
@@ -44,4 +49,5 @@ export const AdminServices = {
   updateUserStatus,
   updateHospitalStatus,
   updateOrganisationStatus,
+  getDonors,
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthContext } from "@/providers/AuthProvider";
-import { notFound, useRouter } from "next/navigation";
+import { notFound, useRouter, usePathname } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 import { Droplets } from "lucide-react";
 import { UserRole } from "@/types";
@@ -23,7 +23,7 @@ function AuthLoadingScreen() {
       </div>
       <div className="text-center space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">
-          Blood<span className="text-primary">Link</span>
+          {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>
         </h1>
         <p className="text-sm text-muted-foreground">Verifying access...</p>
       </div>
@@ -43,12 +43,13 @@ function AuthLoadingScreen() {
 export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
   const { user, isLoading, isAuthenticated } = useAuthContext();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/auth/login");
+      router.push(`/auth/login?callbackUrl=${pathname}`);
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, pathname]);
 
   if (isLoading) {
     return <AuthLoadingScreen />;

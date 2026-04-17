@@ -31,7 +31,7 @@ export default function NotFound() {
           Page Not Found
         </h2>
         <p className="text-muted-foreground mb-10 leading-relaxed">
-          Oops! The page you are looking for doesn't exist or has been moved. 
+          Oops! The page you are looking for doesn't exist or has been moved.
           Don't worry, you can always find your way back.
         </p>
 
@@ -56,10 +56,10 @@ export default function NotFound() {
 
         {/* Branding Footer */}
         <div className="mt-16 flex items-center justify-center gap-2 opacity-50 grayscale">
-            <Droplets className="h-4 w-4" />
-            <span className="text-sm font-bold tracking-tight">
-                Blood<span className="text-primary">Link</span>
-            </span>
+          <Droplets className="h-4 w-4" />
+          <span className="text-sm font-bold tracking-tight">
+            {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>
+          </span>
         </div>
       </div>
     </main>

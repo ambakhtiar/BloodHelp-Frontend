@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
               <Droplets className="h-6 w-6" />
             </div>
             <span className="text-3xl font-extrabold tracking-tight">
-              Blood<span className="text-primary">Link</span>
+              {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>
             </span>
           </Link>
           <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">Forgot Password</h1>

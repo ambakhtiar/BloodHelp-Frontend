@@ -25,7 +25,7 @@ export default function Footer() {
                     <Droplets className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
                   <span className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                    Blood<span className="text-primary">Link</span>
+                    {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>
                   </span>
                 </Link>
                 <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto lg:mx-0">
@@ -110,7 +110,7 @@ export default function Footer() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                       <Mail className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="text-base text-muted-foreground font-medium">support@bloodlink.bd</span>
+                    <span className="text-base text-muted-foreground font-medium">support@{(process.env.NEXT_PUBLIC_APP_NAME_FF || 'blood') + (process.env.NEXT_PUBLIC_APP_NAME_SS || 'link').toLowerCase()}.bd</span>
                   </li>
                   <li className="flex items-center justify-center sm:justify-start gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
@@ -136,7 +136,7 @@ export default function Footer() {
         {/* Bottom Copyright Text */}
         <div className="mt-6 flex flex-col items-center justify-between gap-4 sm:flex-row px-4">
           <p className="text-sm text-muted-foreground font-medium">
-            &copy; {new Date().getFullYear()} BloodLink. All rights reserved.
+            &copy; {new Date().getFullYear()} {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}. All rights reserved.
           </p>
           <div className="flex justify-center gap-1 sm:gap-2">
             <span className="text-sm text-muted-foreground font-medium flex items-center gap-1.5">

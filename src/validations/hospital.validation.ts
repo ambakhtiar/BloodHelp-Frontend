@@ -5,11 +5,12 @@ import { z } from "zod";
  */
 export const recordDonationSchema = z.object({
   contactNumber: z
-    .string({ error: "Contact number is required" })
+    .string({ required_error: "Contact number is required" })
     .regex(/^01[3-9]\d{8}$/, "Please enter a valid Bangladesh phone number (e.g., 01712345678)"),
   weight: z
     .number({ 
-      error: (issue) => issue.input === undefined ? "Weight is required" : "Weight must be a number" 
+      required_error: "Weight is required",
+      invalid_type_error: "Weight must be a number"
     })
     .min(45, "Donor weight must be at least 45kg to safely donate blood"),
 });

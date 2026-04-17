@@ -11,9 +11,20 @@ export function PaymentSuccessHandler({ postId }: PaymentSuccessHandlerProps) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["posts"] });
+    // Aggressively invalidate all related queries
+    const keys = ["posts", "post", "admin-posts", "donations"];
+    
+    keys.forEach(key => {
+      queryClient.invalidateQueries({ queryKey: [key] });
+      queryClient.resetQueries({ queryKey: [key] });
+    });
+
+    // If a specific postId is provided, specifically refetch it after a tiny delay
     if (postId) {
-      queryClient.invalidateQueries({ queryKey: ["post", postId] });
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["post", postId] });
+        queryClient.refetchQueries({ queryKey: ["posts"] });
+      }, 500);
     }
   }, [queryClient, postId]);
 

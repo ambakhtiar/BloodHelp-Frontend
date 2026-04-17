@@ -47,6 +47,7 @@ import { EditPostModal } from "./EditPostModal";
 import { DonateFundsModal } from "@/features/payments/components/DonateFundsModal";
 import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
+import Link from "next/link";
 import { formatDistanceToNow, format } from "date-fns";
 import { LikeAction } from "./LikeAction";
 import { useState, useCallback } from "react";
@@ -314,15 +315,26 @@ export function PostCard({ post }: PostCardProps) {
     : "Just now";
 
   const handleCardClick = (e: React.MouseEvent) => {
+    // If any modal belonging to this post is open, ignore clicks that bubble up
+    if (isDonateOpen || isEditModalOpen) {
+      return;
+    }
+
     const target = e.target as HTMLElement;
-    // Don't navigate if clicking a button, link, or image gallery navigation
-    if (target.closest("button") || target.closest("a") || target.closest("img")) {
+    // Don't navigate if clicking a button, link, image, or specifically excluded areas
+    if (
+      target.closest("button") || 
+      target.closest("a") || 
+      target.closest("img") ||
+      target.closest("input") ||
+      target.closest(".no-navigate")
+    ) {
       return;
     }
 
     if (!user) {
       toast.error("Please login to view details");
-      router.push("/login");
+      router.push(`/auth/login?callbackUrl=/feed/${post.id}`);
       return;
     }
 
@@ -335,7 +347,7 @@ export function PostCard({ post }: PostCardProps) {
   const handleCommentClick = () => {
     if (!user) {
       toast.error("Please login to see and write comments");
-      router.push("/login");
+      router.push(`/auth/login?callbackUrl=/feed/${post.id}`);
       return;
     }
     router.push(`/feed/${post.id}`);
@@ -350,7 +362,7 @@ export function PostCard({ post }: PostCardProps) {
     >
       <CardHeader className="flex flex-row items-start gap-3 pb-3">
         {/* Avatar */}
-        <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg mb-1 overflow-hidden border border-primary/5">
+        <Link href={`/profile/${post.authorId}`} className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg mb-1 overflow-hidden border border-primary/5 hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer">
           {post.author?.profilePictureUrl ? (
             <img 
               src={post.author.profilePictureUrl} 
@@ -360,14 +372,14 @@ export function PostCard({ post }: PostCardProps) {
           ) : (
             authorName.charAt(0)
           )}
-        </div>
+        </Link>
 
         <div className="flex-1 flex flex-col min-w-0 pt-0.5">
           <div className="flex justify-between items-start w-full gap-2">
             <div className="flex flex-col min-w-0">
-              <h3 className="font-semibold text-base leading-tight truncate text-foreground">
+              <Link href={`/profile/${post.authorId}`} className="font-semibold text-base leading-tight truncate text-foreground hover:text-primary hover:underline transition-colors w-fit">
                 {authorName}
-              </h3>
+              </Link>
 
               <div className="flex flex-wrap gap-1 mt-1 mb-1.5">
                 <Badge className={`${getBadgeStyle(post.type)} text-[10px] h-4 px-1.5`}>
@@ -399,8 +411,8 @@ export function PostCard({ post }: PostCardProps) {
               </div>
             </div>
             
-            {/* Options Menu for Author */}
-            {user?.id === post.authorId && (
+            {/* Options Menu for Author and Admin */}
+            {(user?.id === post.authorId || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN") && (
               <div className="flex gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -409,17 +421,19 @@ export function PostCard({ post }: PostCardProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem 
-                      className="cursor-pointer gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsEditModalOpen(true);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" /> Edit Post
-                    </DropdownMenuItem>
+                    {user?.id === post.authorId && (
+                      <DropdownMenuItem 
+                        className="cursor-pointer gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditModalOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" /> Edit Post
+                      </DropdownMenuItem>
+                    )}
                     
-                    {/* Resolve Option */}
+                    {/* Resolve Option for Author or Admin */}
                     {["BLOOD_FINDING", "HELPING"].includes(post.type) && !post.isResolved && (
                       <DropdownMenuItem 
                         className="cursor-pointer gap-2 text-emerald-600 focus:text-emerald-700"
@@ -545,6 +559,11 @@ export function PostCard({ post }: PostCardProps) {
         {/* Crowdfunding block for HELPING posts */}
         {post.type === "HELPING" && post.isApproved && post.isVerified && post.targetAmount && post.targetAmount > 0 && (
           <div className="mt-2 space-y-3">
+          <div 
+            className="space-y-4 pt-1 no-navigate"
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             {/* Progress bar */}
             <div className="bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/50 rounded-xl p-3.5 space-y-2">
               <div className="flex items-center justify-between text-sm">
@@ -564,19 +583,46 @@ export function PostCard({ post }: PostCardProps) {
               </p>
             </div>
 
-            {/* Donate Now button */}
-            <Button
-              className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold gap-2 shadow-sm"
-              onClick={(e) => { e.stopPropagation(); setIsDonateOpen(true); }}
-            >
-              <Heart className="w-4 h-4 fill-white" />
-              Donate Now — SSLCommerz
-            </Button>
+            {/* Donate Now button or Goal Reached Message */}
+            {post.raisedAmount >= post.targetAmount ? (
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl p-4 text-center">
+                <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold mb-1">
+                  <CheckCircle className="w-5 h-5" />
+                  Goal Reached!
+                </div>
+                <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 font-medium">
+                  Target amount successfully reached. Thank you for your kind support!
+                </p>
+              </div>
+            ) : !post.isResolved ? (
+              <Button
+                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold gap-2 shadow-sm"
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  if (!user) {
+                    toast.error("Please login to donate");
+                    router.push(`/auth/login?callbackUrl=/feed/${post.id}`);
+                    return;
+                  }
+                  setIsDonateOpen(true); 
+                }}
+              >
+                <Heart className="w-4 h-4 fill-white" />
+                Donate Now — SSLCommerz
+              </Button>
+            ) : (
+                <div className="bg-secondary/20 border border-border rounded-xl p-4 text-center">
+                   <p className="text-xs text-muted-foreground font-medium">
+                      This request has been resolved.
+                   </p>
+                </div>
+            )}
+          </div>
           </div>
         )}
 
-        {/* bKash/Nagad manual block */}
-        {post.bkashNagadNumber && post.isVerified && (
+        {/* bKash/Nagad manual block - Hide if goal reached or resolved */}
+        {post.bkashNagadNumber && post.isVerified && post.raisedAmount < (post.targetAmount || 0) && !post.isResolved && (
           <div className="flex flex-col gap-2 mt-2">
             <div className="flex items-center gap-3 text-sm text-foreground bg-pink-50/50 dark:bg-pink-950/20 p-3 rounded-lg border border-pink-100 dark:border-pink-900/50">
               <Wallet className="w-5 h-5 text-pink-600 shrink-0 self-start mt-0.5" />

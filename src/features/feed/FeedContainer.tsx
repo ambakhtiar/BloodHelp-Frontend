@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useAuthContext } from "@/providers/AuthProvider";
 
 export default function FeedContainer() {
-  const { user } = useAuthContext();
+  const { user, isAuthenticated } = useAuthContext();
   const [filters, setFilters] = useState<IPostFilters>({
     searchTerm: "",
     type: "",
@@ -63,8 +63,11 @@ export default function FeedContainer() {
   // Get user initial for avatar
   const userName =
     user?.donorProfile?.name ||
+    user?.bloodDonor?.name ||
     user?.hospital?.name ||
     user?.organisation?.name ||
+    user?.admin?.name ||
+    user?.email?.split("@")[0] ||
     "User";
   const userInitial = userName.charAt(0).toUpperCase();
 
@@ -97,42 +100,45 @@ export default function FeedContainer() {
         </div>
 
         {/* ═══════ Create Post Prompt ═══════ */}
-        <div className="bg-card rounded-xl border border-primary/10 shadow-sm overflow-hidden">
-          <Link href="/posts/create" className="block p-4">
-             <div className="flex gap-3 items-center">
-               <div className="h-10 w-10 flex items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-sm border-2 border-primary/20 shrink-0 overflow-hidden">
-                 {user?.profilePictureUrl ? (
-                    <img 
-                      src={user.profilePictureUrl} 
-                      alt={userName} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    userInitial
-                  )}
-               </div>
-               <div className="bg-secondary/40 hover:bg-secondary/60 text-muted-foreground w-full py-2.5 px-4 rounded-full transition-colors text-sm">
-                 What kind of help or donation do you need?
-               </div>
-             </div>
-          </Link>
-          <div className="border-t border-primary/5 px-2 py-1.5 flex">
-            <Link href="/posts/create" className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-destructive hover:bg-destructive/5 transition-colors">
-              <Droplets className="w-3.5 h-3.5" />
-              Blood Request
-            </Link>
-            <div className="w-px bg-primary/10 my-1" />
-            <Link href="/posts/create" className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors">
-              <Heart className="w-3.5 h-3.5" />
-              Donate Blood
-            </Link>
-            <div className="w-px bg-primary/10 my-1" />
-            <Link href="/posts/create" className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
-              <HandHelping className="w-3.5 h-3.5" />
-              Get Help
-            </Link>
+        {isAuthenticated && user && (
+          <div className="bg-card rounded-xl border border-primary/10 shadow-sm overflow-hidden">
+            <div className="p-4 flex gap-3 items-center">
+              <Link 
+                href="/profile" 
+                className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-black text-xs border-2 border-primary/20 shrink-0 overflow-hidden hover:scale-105 active:scale-95 transition-all shadow-sm"
+              >
+                {user?.profilePictureUrl ? (
+                  <img 
+                    src={user.profilePictureUrl} 
+                    alt={userName} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="drop-shadow-sm">{userInitial}</span>
+                )}
+              </Link>
+              <Link href="/posts/create" className="bg-secondary/40 hover:bg-secondary/60 text-muted-foreground w-full py-2.5 px-4 rounded-full transition-colors text-sm">
+                What kind of help or donation do you need?
+              </Link>
+            </div>
+            <div className="border-t border-primary/5 px-2 py-1.5 flex">
+              <Link href="/posts/create" className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-destructive hover:bg-destructive/5 transition-colors">
+                <Droplets className="w-3.5 h-3.5" />
+                Blood Request
+              </Link>
+              <div className="w-px bg-primary/10 my-1" />
+              <Link href="/posts/create" className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors">
+                <Heart className="w-3.5 h-3.5" />
+                Donate Blood
+              </Link>
+              <div className="w-px bg-primary/10 my-1" />
+              <Link href="/posts/create" className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
+                <HandHelping className="w-3.5 h-3.5" />
+                Get Help
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Initial Loading */}
         {isLoading && (

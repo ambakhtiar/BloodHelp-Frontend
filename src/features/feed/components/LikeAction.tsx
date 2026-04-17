@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toggleLike } from "@/services/post.service";
 import { toast } from "sonner"; // Assuming sonner is used, if not we'll fallback to alert
 import { useAuthContext } from "@/providers/AuthProvider";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface LikeActionProps {
   postId: string;
@@ -19,19 +19,30 @@ export function LikeAction({ postId, initialLikes, initialHasLiked }: LikeAction
   const queryClient = useQueryClient();
   const { user } = useAuthContext();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [hasLiked, setHasLiked] = useState(initialHasLiked);
   const [likesCount, setLikesCount] = useState(initialLikes);
 
+  // Sync state with props when they change (e.g. after login/refetch)
+  useEffect(() => {
+    setHasLiked(initialHasLiked);
+    setLikesCount(initialLikes);
+  }, [initialHasLiked, initialLikes]);
+
   const mutation = useMutation({
     mutationFn: () => toggleLike(postId),
     onMutate: async () => {
-      // Optimistic update
+      // Optimistically update the UI
       const previousHasLiked = hasLiked;
       const previousCount = likesCount;
 
-      setHasLiked(!previousHasLiked);
-      setLikesCount(prev => previousHasLiked ? prev - 1 : prev + 1);
+      // Toggle state: If already liked, decrease count. If not liked, increase count.
+      const newHasLiked = !previousHasLiked;
+      const newLikesCount = newHasLiked ? previousCount + 1 : Math.max(0, previousCount - 1);
+
+      setHasLiked(newHasLiked);
+      setLikesCount(newLikesCount);
 
       return { previousHasLiked, previousCount };
     },
@@ -41,18 +52,20 @@ export function LikeAction({ postId, initialLikes, initialHasLiked }: LikeAction
         setHasLiked(context.previousHasLiked);
         setLikesCount(context.previousCount);
       }
-      // Silently handle error as per user request to remove toasts from Like
+      toast.error("Failed to update like status");
     },
-    onSuccess: (data) => {
-      // Background sync
+    onSuccess: () => {
+      // Invalidate queries to sync with server in background
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
     }
   });
 
-  const handleLike = () => {
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card navigation
     if (!user) {
       toast.error("Please login to like this post");
-      router.push("/login");
+      router.push(`/auth/login?callbackUrl=${pathname}`);
       return;
     }
     mutation.mutate();

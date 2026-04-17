@@ -77,7 +77,11 @@ export function DonateFundsModal({
         return;
       }
       setSubmitted(true);
-      mutation.mutate({ postId, amount: result.data.amount });
+
+      mutation.mutate({ 
+        postId, 
+        amount: result.data.amount
+      });
     },
   });
 
@@ -164,20 +168,34 @@ export function DonateFundsModal({
                       type="number"
                       min={10}
                       placeholder="Minimum ৳10"
-                      className="pl-7 h-11 text-base"
+                      className="pl-7 h-11 text-base focus-visible:ring-blue-500"
                       value={field.state.value === undefined ? "" : String(field.state.value)}
-                      onChange={(e) =>
-                        field.handleChange(
-                          e.target.value === ""
-                            ? ("" as unknown as number)
-                            : (Number(e.target.value) as unknown as number)
-                        )
-                      }
+                      onChange={(e) => {
+                        const val = e.target.value === "" ? 0 : Number(e.target.value);
+                        field.handleChange(val as unknown as number);
+                      }}
                     />
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Minimum donation: ৳10 · Secured by SSLCommerz
-                  </p>
+                  {targetAmount && (
+                    <div className="flex flex-col gap-1 mt-1.5">
+                      <p className="text-[11px] text-muted-foreground">
+                        Minimum donation: ৳10 · Secured by SSLCommerz
+                      </p>
+                      {raisedAmount < targetAmount && (
+                        <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
+                          লক্ষ্য পূরণে আরও ৳{(targetAmount - raisedAmount).toLocaleString()} দরকার।{" "}
+                          <span className="font-bold underline cursor-pointer" onClick={() => field.handleChange((targetAmount - raisedAmount) as unknown as number)}>
+                            ৳{(targetAmount - raisedAmount).toLocaleString()} দিলেই চলবে।
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {targetAmount && field.state.value > (targetAmount - raisedAmount) && (
+                    <p className="text-[11px] font-bold text-destructive animate-pulse mt-1">
+                      আপনি টার্গেট মূল্যের বেশি দিতে চাইছেন। ৳{(targetAmount - raisedAmount).toLocaleString()} দিলে হবে এর চেয়ে বেশি দেওয়া লাগবে না।
+                    </p>
+                  )}
                 </div>
               )}
             </form.Field>
@@ -185,7 +203,12 @@ export function DonateFundsModal({
             <Button
               type="submit"
               className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold gap-2 shadow-lg shadow-blue-500/20"
-              disabled={mutation.isPending || submitted}
+              disabled={
+                mutation.isPending || 
+                submitted || 
+                (targetAmount ? Number(form.getFieldValue("amount")) > (targetAmount - raisedAmount) : false) ||
+                Number(form.getFieldValue("amount")) < 10
+              }
             >
               {mutation.isPending ? (
                 <>

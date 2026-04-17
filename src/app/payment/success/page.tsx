@@ -3,6 +3,8 @@ import Link from "next/link";
 import { PaymentSuccessHandler } from "@/features/payments/components/PaymentSuccessHandler";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Payment Successful - BloodLink",
 };
@@ -13,10 +15,11 @@ export default async function PaymentSuccessPage({
   searchParams: Promise<{ transactionId?: string; postId?: string }>;
 }) {
   const params = await searchParams;
+  const postId = params.postId || (params as any).postid || (params as any).postID;
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-background p-4">
-      <PaymentSuccessHandler postId={params.postId} />
+      <PaymentSuccessHandler postId={postId} />
 
       <div className="w-full max-w-md text-center space-y-6">
         {/* Icon */}
@@ -49,11 +52,13 @@ export default async function PaymentSuccessPage({
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button asChild className="flex-1 bg-green-600 hover:bg-green-700 text-white">
-            <Link href="/feed">Back to Feed</Link>
+          <Button asChild className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold h-11 rounded-xl shadow-lg shadow-green-200 dark:shadow-green-900/20">
+            <Link href={postId ? `/feed/${postId}` : "/feed"}>
+              {postId ? "View Post Details" : "Back to Feed"}
+            </Link>
           </Button>
-          <Button asChild variant="outline" className="flex-1">
-            <Link href="/">Home</Link>
+          <Button asChild variant="outline" className="flex-1 font-bold h-11 rounded-xl border-2">
+            <Link href="/feed">Back to Feed</Link>
           </Button>
         </div>
       </div>

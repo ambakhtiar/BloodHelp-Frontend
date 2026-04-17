@@ -42,9 +42,9 @@ function AuthLoadingScreen() {
       {/* Brand Name */}
       <div className="text-center space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">
-          Blood<span className="text-primary">Link</span>
+          {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>
         </h1>
-        <p className="text-sm text-muted-foreground">Loading BloodLink...</p>
+        <p className="text-sm text-muted-foreground">Loading {process.env.NEXT_PUBLIC_APP_NAME_FF || "Blood"}{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}...</p>
       </div>
 
       {/* Progress Dots */}

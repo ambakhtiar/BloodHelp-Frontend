@@ -11,9 +11,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <RoleGuard allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
-      <div className="flex min-h-screen bg-muted/20">
-        {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-72 shrink-0 border-r bg-card">
+      <div className="flex h-screen overflow-hidden bg-muted/20">
+        {/* Desktop Sidebar - Fixed and Scrollable if needed */}
+        <aside className="hidden md:block w-72 shrink-0 border-r bg-card h-full overflow-y-auto">
           <AdminSidebar />
         </aside>
 
@@ -27,11 +27,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </SheetContent>
         </Sheet>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        {/* Main Content Area - Scrollable */}
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
           <AdminHeader onMenuClick={() => setIsSidebarOpen(true)} />
-          <main className="flex-1 p-4 md:p-8 max-w-[1600px] mx-auto w-full">
-            {children}
+          <main className="flex-1 overflow-y-auto p-4 md:p-8">
+            <div className="max-w-[1600px] mx-auto w-full">
+              {children}
+            </div>
           </main>
         </div>
       </div>
