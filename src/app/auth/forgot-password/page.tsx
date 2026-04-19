@@ -4,8 +4,8 @@ import { Droplets } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Forgot Password - BloodLink",
-  description: "Reset your BloodLink account password",
+  title: `Forgot Password - ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
+  description: `Reset your ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} account password`,
 };
 
 export default function ForgotPasswordPage() {

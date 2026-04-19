@@ -4,8 +4,8 @@ import { Droplets } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Register - BloodLink",
-  description: "Create a new BloodLink account",
+  title: `Register - ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
+  description: `Create a new ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} account`,
 };
 
 export default function RegisterPage() {

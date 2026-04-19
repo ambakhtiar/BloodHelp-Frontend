@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import {
   MoreHorizontal,
   CalendarDays,
@@ -47,10 +48,10 @@ import UpdateDonationDateModal from "./UpdateDonationDateModal";
 import EditVolunteerModal from "./EditVolunteerModal";
 
 const BLOOD_GROUP_LABELS: Record<string, string> = {
-  A_POSITIVE: "A+",  A_NEGATIVE: "A-",
-  B_POSITIVE: "B+",  B_NEGATIVE: "B-",
+  A_POSITIVE: "A+", A_NEGATIVE: "A-",
+  B_POSITIVE: "B+", B_NEGATIVE: "B-",
   AB_POSITIVE: "AB+", AB_NEGATIVE: "AB-",
-  O_POSITIVE: "O+",  O_NEGATIVE: "O-",
+  O_POSITIVE: "O+", O_NEGATIVE: "O-",
 };
 
 interface ModalState {
@@ -156,7 +157,16 @@ export default function VolunteersTable() {
             {volunteers.map((vol) => (
               <TableRow key={vol.id} className="hover:bg-slate-50/60">
                 <TableCell className="font-medium text-slate-800">
-                  {vol.bloodDonor.name}
+                  {vol.status === "ACCEPTED" && vol.bloodDonor.userId && (vol.bloodDonor as any).user?.donorProfile ? (
+                    <Link
+                      href={`/profile/${vol.bloodDonor.userId}`}
+                      className="text-primary hover:underline font-semibold"
+                    >
+                      {vol.bloodDonor.name}
+                    </Link>
+                  ) : (
+                    <span>{vol.bloodDonor.name}</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-slate-600 text-sm">
                   {vol.bloodDonor.contactNumber}
@@ -170,13 +180,17 @@ export default function VolunteersTable() {
                   {vol.bloodDonor.gender.toLowerCase()}
                 </TableCell>
                 <TableCell className="text-slate-600 text-sm">
-                  {vol.bloodDonor.lastDonationDate
-                    ? new Date(vol.bloodDonor.lastDonationDate).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })
-                    : <span className="text-slate-400 italic">Not recorded</span>}
+                  {vol.status === "PENDING" ? (
+                    <span className="text-yellow-600 italic text-xs">Awaiting confirmation</span>
+                  ) : vol.bloodDonor.lastDonationDate ? (
+                    new Date(vol.bloodDonor.lastDonationDate).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  ) : (
+                    <span className="text-slate-400 italic">Not recorded</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge
@@ -184,8 +198,8 @@ export default function VolunteersTable() {
                       vol.status === "ACCEPTED"
                         ? "bg-green-100 text-green-700 border-green-300"
                         : vol.status === "PENDING"
-                        ? "bg-yellow-100 text-yellow-700 border-yellow-300"
-                        : "bg-red-100 text-red-700 border-red-300"
+                          ? "bg-yellow-100 text-yellow-700 border-yellow-300"
+                          : "bg-red-100 text-red-700 border-red-300"
                     }
                     variant="outline"
                   >

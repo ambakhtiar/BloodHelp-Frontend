@@ -2,7 +2,7 @@ import { RecordDonationForm } from "@/features/hospital/components/RecordDonatio
 import { PlusCircle, Info } from "lucide-react";
 
 export const metadata = {
-  title: "Record Donation | BloodLink Hospital",
+  title: `Record Donation | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} Hospital`,
   description: "Record a new blood donation for a donor.",
 };
 

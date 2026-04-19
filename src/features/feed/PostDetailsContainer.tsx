@@ -75,7 +75,7 @@ export default function PostDetailsContainer({ postId }: { postId: string }) {
     post.author?.bloodDonor?.name ||
     post.author?.hospital?.name ||
     post.author?.organisation?.name ||
-    "BloodLink User";
+    `${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} User`;
 
   const timeAgo = post.createdAt
     ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })

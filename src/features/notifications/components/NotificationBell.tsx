@@ -17,6 +17,8 @@ import {
   markAllRead,
   markAsRead,
 } from "@/services/notification.service";
+import { respondToConsent, respondToHospitalRequest } from "@/services/post.service";
+import { respondToVolunteerConsent } from "@/services/organisation.service";
 import { INotification } from "@/types/notification.types";
 import { formatDistanceToNow } from "date-fns";
 
@@ -50,6 +52,62 @@ export function NotificationBell() {
     },
     onError: () => {
       toast.error("Failed to mark all as read");
+    },
+  });
+
+  const consentMutation = useMutation({
+    mutationFn: ({ postId, status }: { postId: string; status: 'ACCEPTED' | 'REJECTED' }) =>
+      respondToConsent(postId, status),
+    onSuccess: (_, variables) => {
+      const isAccepted = variables.status === 'ACCEPTED';
+      toast.success(
+        isAccepted
+          ? "✅ Accepted! Your profile and timeline have been updated."
+          : "❌ Rejected. The original post remains."
+      );
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || "Failed to respond to consent request.";
+      toast.error(msg);
+    },
+  });
+
+  const hospitalRequestMutation = useMutation({
+    mutationFn: ({ requestId, status }: { requestId: string; status: 'ACCEPTED' | 'REJECTED' }) =>
+      respondToHospitalRequest(requestId, status),
+    onSuccess: (_, variables) => {
+      const isAccepted = variables.status === 'ACCEPTED';
+      toast.success(
+        isAccepted
+          ? "✅ Donation accepted! Your profile, timeline, and donation history have been updated."
+          : "❌ Donation declined."
+      );
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || "Failed to respond to donation request.";
+      toast.error(msg);
+    },
+  });
+
+  const volunteerConsentMutation = useMutation({
+    mutationFn: ({ volunteerId, status }: { volunteerId: string; status: 'ACCEPTED' | 'REJECTED' }) =>
+      respondToVolunteerConsent(volunteerId, status),
+    onSuccess: (_, variables) => {
+      const isAccepted = variables.status === 'ACCEPTED';
+      toast.success(
+        isAccepted
+          ? "✅ You have joined the organisation as a volunteer!"
+          : "❌ Volunteer invitation rejected."
+      );
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || "Failed to respond to volunteer invitation.";
+      toast.error(msg);
     },
   });
 
@@ -137,11 +195,11 @@ export function NotificationBell() {
           ) : (
             <div className="divide-y divide-border/40">
               {notifications.map((notification) => (
-                <button
+                <div
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
                   className={cn(
-                    "w-full text-left px-4 py-3.5 flex gap-3 items-start transition-colors hover:bg-accent/50 group",
+                    "w-full text-left px-4 py-3.5 flex gap-3 items-start transition-colors hover:bg-accent/50 group cursor-pointer",
                     !notification.isRead && "bg-primary/[0.04]"
                   )}
                 >
@@ -173,8 +231,92 @@ export function NotificationBell() {
                         addSuffix: true,
                       })}
                     </p>
+
+                    {/* ── Consent Action Buttons (B-3: post consent flow) ── */}
+                    {notification.type === "DONATION_CONSENT_REQUEST" && notification.postId && (
+                      <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          disabled={consentMutation.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            consentMutation.mutate({ postId: notification.postId!, status: 'ACCEPTED' });
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-600 hover:bg-green-700 text-white text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
+                        >
+                          ✅ Accept
+                        </button>
+                        <button
+                          type="button"
+                          disabled={consentMutation.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            consentMutation.mutate({ postId: notification.postId!, status: 'REJECTED' });
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted hover:bg-destructive/10 hover:text-destructive text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
+                        >
+                          ❌ Reject
+                        </button>
+                      </div>
+                    )}
+
+                    {/* ── Hospital Donation Record Buttons ── */}
+                    {notification.type === "DONATION_RECORD_REQUEST" && notification.postId && !notification.isRead && (
+                      <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          disabled={hospitalRequestMutation.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            hospitalRequestMutation.mutate({ requestId: notification.postId!, status: 'ACCEPTED' });
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-600 hover:bg-green-700 text-white text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
+                        >
+                          ✅ Accept
+                        </button>
+                        <button
+                          type="button"
+                          disabled={hospitalRequestMutation.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            hospitalRequestMutation.mutate({ requestId: notification.postId!, status: 'REJECTED' });
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted hover:bg-destructive/10 hover:text-destructive text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
+                        >
+                          ❌ Reject
+                        </button>
+                      </div>
+                    )}
+
+                    {/* ── Volunteer Consent Buttons ── */}
+                    {notification.type === "VOLUNTEER_CONSENT_REQUEST" && notification.postId && !notification.isRead && (
+                      <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          disabled={volunteerConsentMutation.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            volunteerConsentMutation.mutate({ volunteerId: notification.postId!, status: 'ACCEPTED' });
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-600 hover:bg-green-700 text-white text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
+                        >
+                          ✅ Join
+                        </button>
+                        <button
+                          type="button"
+                          disabled={volunteerConsentMutation.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            volunteerConsentMutation.mutate({ volunteerId: notification.postId!, status: 'REJECTED' });
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted hover:bg-destructive/10 hover:text-destructive text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
+                        >
+                          ❌ Decline
+                        </button>
+                      </div>
+                    )}
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           )}

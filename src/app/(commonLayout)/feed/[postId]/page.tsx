@@ -3,7 +3,7 @@ import PostDetailsContainer from "@/features/feed/PostDetailsContainer";
 import { RoleGuard } from "@/components/shared/RoleGuard";
 
 export const metadata = {
-  title: "Post Details - BloodLink",
+  title: `Post Details - ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
 };
 
 export default async function PostDetailsPage({

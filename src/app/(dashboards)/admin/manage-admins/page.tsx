@@ -4,7 +4,7 @@ import { CreateAdminModal } from "@/features/super-admin/components/CreateAdminM
 import { ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Manage Admins | BloodLink",
+  title: `Manage Admins | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
   description: "Administrative account management for Super Admins.",
 };
 

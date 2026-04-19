@@ -60,3 +60,19 @@ export const updateVolunteerInfo = async (
   );
   return response.data;
 };
+
+/**
+ * USER responds to a volunteer invitation from an organisation.
+ * volunteerId is the OrganisationVolunteer.id stored in notification.postId.
+ */
+export const respondToVolunteerConsent = async (
+  volunteerId: string,
+  status: "ACCEPTED" | "REJECTED"
+) => {
+  const response = await axiosInstance.patch<ApiResponse<null>>(
+    `/organisations/volunteers/consent/${volunteerId}`,
+    { status }
+  );
+  return response.data;
+};
+

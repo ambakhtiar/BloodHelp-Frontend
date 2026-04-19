@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import AddVolunteerForm from "@/features/organisation/components/AddVolunteerForm";
 
 export const metadata = {
-  title: "Add Volunteer | BloodLink Organisation",
+  title: `Add Volunteer | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} Organisation`,
   description: "Register a new blood donor volunteer under your organisation.",
 };
 

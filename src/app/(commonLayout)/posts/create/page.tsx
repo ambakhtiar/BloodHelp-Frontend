@@ -1,9 +1,9 @@
 import { CreatePostForm } from "@/features/post/components/CreatePostForm";
 
 export const metadata = {
-  title: "Create a New Post | BloodLink",
+  title: `Create a New Post | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
   description:
-    "Create a blood finding request, blood donation offer, or financial help campaign on BloodLink.",
+    `Create a blood finding request, blood donation offer, or financial help campaign on ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}.`,
 };
 
 export default function CreatePostPage() {

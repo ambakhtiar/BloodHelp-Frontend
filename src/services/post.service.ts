@@ -108,3 +108,31 @@ export const toggleDeletePost = async (id: string): Promise<any> => {
   const response = await axiosInstance.patch(`/posts/${id}/toggle-delete`);
   return response.data;
 };
+
+export interface IDonorLookupResult {
+  found: boolean;
+  type?: 'platform_user' | 'blood_donor';
+  name?: string;
+  bloodGroup?: string;
+  gender?: string;
+  lastDonationDate?: string;
+}
+
+/** Check if a donor exists by contact number — used in CreatePostForm */
+export const checkDonorByPhone = async (contactNumber: string): Promise<{ data: IDonorLookupResult }> => {
+  const response = await axiosInstance.get(`/posts/check-donor/${contactNumber}`);
+  return response.data;
+};
+
+/** Accept or Reject a B-3 donation consent notification */
+export const respondToConsent = async (postId: string, status: 'ACCEPTED' | 'REJECTED'): Promise<any> => {
+  const response = await axiosInstance.post(`/posts/${postId}/consent`, { status });
+  return response.data;
+};
+
+/** Accept or Reject a hospital donation record request (DONATION_RECORD_REQUEST) */
+export const respondToHospitalRequest = async (requestId: string, status: 'ACCEPTED' | 'REJECTED'): Promise<any> => {
+  const response = await axiosInstance.patch(`/hospitals/requests/${requestId}`, { status });
+  return response.data;
+};
+

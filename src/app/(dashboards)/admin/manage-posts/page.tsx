@@ -3,7 +3,7 @@ import { ManagePostsTable } from "@/features/admin/components/ManagePostsTable";
 import { FileText, Droplets } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Manage Posts | BloodLink Admin",
+  title: `Manage Posts | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} Admin`,
   description: "Review and verify blood donation and financial help requests.",
 };
 

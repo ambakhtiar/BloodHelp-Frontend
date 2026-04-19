@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Plus, X, AlertTriangle, Clock, Heart, HandHelping, MapPin } from "lucide-react";
+import { Loader2, Plus, X, AlertTriangle, Clock, Heart, HandHelping, MapPin, Search, UserCheck, UserX } from "lucide-react";
 import { createPostSchema, type CreatePostFormValues } from "@/validations/post.validation";
-import { createPost } from "@/services/post.service";
+import { createPost, checkDonorByPhone } from "@/services/post.service";
 import { getDivisions, getDistricts, getUpazilas } from "@/lib/bd-location";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/providers/AuthProvider";
 
 // ── Styling Classes (consistent with RegisterForm) ───────────────────────────
 const inputClass =
@@ -40,7 +41,7 @@ interface FormState {
   content: string;
   images: string[];
   phone: string;
-  location: string; // Detailed location
+  location: string;
   division: string;
   district: string;
   upazila: string;
@@ -52,6 +53,10 @@ interface FormState {
   medicalIssues: string;
   targetAmount: string;
   bkashNagadNumber: string;
+  // Donor fields (for BLOOD_DONATION when posting for someone else)
+  donorName: string;
+  donorBloodGroup: string;
+  donorGender: string;
 }
 
 const initialForm: FormState = {
@@ -72,6 +77,9 @@ const initialForm: FormState = {
   medicalIssues: "",
   targetAmount: "",
   bkashNagadNumber: "",
+  donorName: "",
+  donorBloodGroup: "",
+  donorGender: "",
 };
 
 // ── Helper Components ────────────────────────────────────────────────────────
@@ -97,10 +105,31 @@ function SectionDivider({ title, icon }: { title: string; icon: React.ReactNode 
 export function CreatePostForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user } = useAuthContext();
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [donationTarget, setDonationTarget] = useState<"SELF" | "OTHER">("SELF");
+
+  // ── Donor Lookup State (for BLOOD_DONATION OTHER mode) ────────────────────
+  const [donorSearchInput, setDonorSearchInput] = useState(""); // raw digits user types
+  const [donorLookupPhone, setDonorLookupPhone] = useState(""); // full phone number that triggers query
+
+  // ── Donor Lookup Query (enabled only when donorLookupPhone is set) ──────────
+  const {
+    data: donorLookupData,
+    isFetching: isSearchingDonor,
+    isSuccess: donorSearchDone,
+  } = useQuery({
+    queryKey: ["checkDonor", donorLookupPhone],
+    queryFn: () => checkDonorByPhone(donorLookupPhone),
+    enabled: !!donorLookupPhone,
+    staleTime: 0,
+    retry: false,
+  });
+
+  const donorInfo = donorSearchDone ? donorLookupData?.data : null;
 
   // ── Location Cascading ───────────────────────────────────────────────────
   const divisions = useMemo(() => getDivisions(), []);
@@ -138,7 +167,24 @@ export function CreatePostForm() {
       }
     } else if (form.type === "BLOOD_DONATION") {
       base.title = form.title;
-      if (form.bloodGroup) base.bloodGroup = form.bloodGroup;
+      base.isForSelf = donationTarget === "SELF";
+
+      if (donationTarget === "SELF") {
+        // Backend reads blood group / gender / phone from user's donor profile
+      } else {
+        // Posting for someone else
+        const fullDonorPhone = donorSearchInput ? `${COUNTRY_CODE}${donorSearchInput}` : "";
+        base.donorContactNumber = fullDonorPhone;
+
+        if (donorInfo && !donorInfo.found) {
+          // B-1: manual input needed
+          base.donorName = form.donorName;
+          base.donorBloodGroup = form.donorBloodGroup;
+          base.donorGender = form.donorGender;
+        }
+        // B-2/B-3: backend reads info from existing BloodDonor/User by phone
+      }
+
       if (form.donationTime) {
         base.donationTime = new Date(form.donationTime).toISOString();
       }
@@ -151,7 +197,7 @@ export function CreatePostForm() {
     }
 
     return base;
-  }, [form]);
+  }, [form, donationTarget, donorSearchInput, donorInfo]);
 
   // ── Validation ───────────────────────────────────────────────────────────
   const validateField = useCallback(
@@ -206,8 +252,13 @@ export function CreatePostForm() {
           next.medicalIssues = "";
           next.targetAmount = "";
           next.bkashNagadNumber = "";
+          next.donorName = "";
+          next.donorBloodGroup = "";
+          next.donorGender = "";
           setErrors({});
           setTouched({});
+          setDonorSearchInput("");
+          setDonorLookupPhone("");
         }
         return next;
       });
@@ -227,6 +278,21 @@ export function CreatePostForm() {
     },
     [validateField]
   );
+  
+  // Effect to auto-fill contact number when "SELF" is selected
+  useEffect(() => {
+    if (form.type === "BLOOD_DONATION" && user?.role === "USER" && donationTarget === "SELF" && user?.contactNumber) {
+      let digits = user.contactNumber.replace(/\D/g, "");
+      if (digits.startsWith("880")) digits = digits.substring(3);
+      else if (digits.startsWith("88")) digits = digits.substring(2);
+      else if (digits.startsWith("8")) digits = digits.substring(1);
+      if (digits.startsWith("0")) digits = digits.substring(1);
+      digits = digits.slice(0, 10);
+      if (form.phone !== digits) {
+        handleChange("phone", digits);
+      }
+    }
+  }, [form.type, user, donationTarget, handleChange]);
 
   // ── Image Management (max 5 images) ────────────────────────────────────────
   const MAX_IMAGES = 5;
@@ -517,14 +583,248 @@ export function CreatePostForm() {
               <SectionDivider title="Donation Details" icon={<Heart className="w-4 h-4 text-primary" />} />
             </div>
 
-            {/* Title */}
+            {/* ── Target Selection: only for USER role ── */}
+            {user?.role === "USER" && (
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium">
+                  এই পোস্ট কার জন্য? <RequiredMark />
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDonationTarget("SELF");
+                      setDonorSearchInput("");
+                      setDonorLookupPhone("");
+                    }}
+                    className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-all cursor-pointer hover:shadow-sm ${
+                      donationTarget === "SELF" ? "border-primary bg-primary/10 text-primary shadow-sm" : "border-muted text-muted-foreground hover:bg-muted/50"
+                    }`}
+                  >
+                    🙋 For Myself
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDonationTarget("OTHER");
+                      handleChange("phone", "");
+                    }}
+                    className={`flex-1 py-2.5 px-4 rounded-lg border text-sm font-medium transition-all cursor-pointer hover:shadow-sm ${
+                      donationTarget === "OTHER" ? "border-primary bg-primary/10 text-primary shadow-sm" : "border-muted text-muted-foreground hover:bg-muted/50"
+                    }`}
+                  >
+                    👥 For Someone Else
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── SELF mode: informational callout ── */}
+            {(donationTarget === "SELF" || user?.role !== "USER") && user?.role === "USER" && (
+              <div className="sm:col-span-2 flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                <UserCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-primary">Your profile information will be used</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Blood group, gender and contact number will be taken automatically from your registered profile.</p>
+                </div>
+              </div>
+            )}
+
+            {/* ── OTHER mode: Donor phone lookup ── */}
+            {(donationTarget === "OTHER" || user?.role === "HOSPITAL" || user?.role === "ORGANISATION") && (
+              <div className="sm:col-span-2 space-y-4">
+                {/* Phone search row */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Donor&apos;s Phone Number <RequiredMark />
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="flex flex-1">
+                      <div className="flex h-10 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm font-medium text-muted-foreground select-none">
+                        🇧🇩 {COUNTRY_CODE}
+                      </div>
+                      <input
+                        type="tel"
+                        placeholder="1XXXXXXXXX"
+                        value={donorSearchInput}
+                        onChange={(e) => {
+                          let digits = e.target.value.replace(/\D/g, "");
+                          if (digits.startsWith("880")) digits = digits.substring(3);
+                          else if (digits.startsWith("88")) digits = digits.substring(2);
+                          else if (digits.startsWith("8")) digits = digits.substring(1);
+                          if (digits.startsWith("0")) digits = digits.substring(1);
+                          digits = digits.slice(0, 10);
+                          setDonorSearchInput(digits);
+                          // Reset previous lookup if phone changes
+                          if (donorLookupPhone) setDonorLookupPhone("");
+                        }}
+                        className={`${inputClass} rounded-l-none`}
+                        maxLength={10}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-10 px-4 gap-2 shrink-0"
+                      disabled={donorSearchInput.length < 10 || isSearchingDonor}
+                      onClick={() => setDonorLookupPhone(`${COUNTRY_CODE}${donorSearchInput}`)}
+                    >
+                      {isSearchingDonor ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Search className="w-4 h-4" />
+                      )}
+                      Search
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">10-digit number, e.g. 1XXXXXXXXX</p>
+                </div>
+
+                {/* Donor found (B-2 or B-3) */}
+                {donorInfo && donorInfo.found && (
+                  <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/40 rounded-lg">
+                    <UserCheck className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-green-700 dark:text-green-400">✅ Donor Found!</p>
+                      <div className="mt-1.5 grid grid-cols-3 gap-2 text-xs">
+                        <span className="bg-white dark:bg-green-900/20 rounded px-2 py-1 border border-green-200 dark:border-green-800/30 font-medium">
+                          👤 {donorInfo.name || "—"}
+                        </span>
+                        <span className="bg-white dark:bg-green-900/20 rounded px-2 py-1 border border-green-200 dark:border-green-800/30 font-medium">
+                          🩸 {donorInfo.bloodGroup || "—"}
+                        </span>
+                        <span className="bg-white dark:bg-green-900/20 rounded px-2 py-1 border border-green-200 dark:border-green-800/30 font-medium">
+                          {donorInfo.gender === "FEMALE" ? "♀️ Female" : "♂️ Male"}
+                        </span>
+                      </div>
+                      {donorInfo.type === "platform_user" && (
+                        <p className="text-[10px] text-green-600 mt-1.5">Platform user — they will receive a consent notification.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Donor NOT found (B-1) — manual input */}
+                {donorInfo && !donorInfo.found && (
+                  <div className="space-y-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <UserX className="w-4 h-4 text-amber-600" />
+                      <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                        Donor not registered — please enter details manually
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {/* Donor Name */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium">Donor Name <RequiredMark /></label>
+                        <input
+                          type="text"
+                          placeholder="Full Name"
+                          value={form.donorName}
+                          onChange={(e) => handleChange("donorName", e.target.value)}
+                          className={inputClass}
+                        />
+                      </div>
+                      {/* Blood Group */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium">Blood Group <RequiredMark /></label>
+                        <select
+                          value={form.donorBloodGroup}
+                          onChange={(e) => handleChange("donorBloodGroup", e.target.value)}
+                          className={selectClass}
+                        >
+                          <option value="">Select</option>
+                          {BLOOD_GROUPS.map((bg) => (
+                            <option key={bg.value} value={bg.value}>{bg.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Gender */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium">Gender <RequiredMark /></label>
+                        <select
+                          value={form.donorGender}
+                          onChange={(e) => handleChange("donorGender", e.target.value)}
+                          className={selectClass}
+                        >
+                          <option value="">Select</option>
+                          <option value="MALE">Male</option>
+                          <option value="FEMALE">Female</option>
+                        </select>
+                      </div>
+                    </div>
+                    {/* B-1: Contact Number (required for unregistered donor) */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium">Donor Contact Number <RequiredMark /></label>
+                      <p className="text-[10px] text-muted-foreground">Used to identify this donor if they register later.</p>
+                    </div>
+                    {/* B-1: Location (required) */}
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5" /> Donor Location <RequiredMark />
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* Division */}
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-muted-foreground">Division</label>
+                          <select
+                            value={form.division}
+                            onChange={(e) => handleChange("division", e.target.value)}
+                            className={selectClass}
+                          >
+                            <option value="">Select Division</option>
+                            {divisions.map((d) => <option key={d} value={d}>{d}</option>)}
+                          </select>
+                        </div>
+                        {/* District */}
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-muted-foreground">District</label>
+                          <select
+                            value={form.district}
+                            onChange={(e) => handleChange("district", e.target.value)}
+                            className={selectClass}
+                            disabled={!form.division}
+                          >
+                            <option value="">{form.division ? "Select District" : "Select division first"}</option>
+                            {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+                          </select>
+                        </div>
+                        {/* Upazila */}
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-muted-foreground">Upazila</label>
+                          <select
+                            value={form.upazila}
+                            onChange={(e) => handleChange("upazila", e.target.value)}
+                            className={selectClass}
+                            disabled={!form.district}
+                          >
+                            <option value="">{form.district ? "Select Upazila" : "Select district first"}</option>
+                            {upazilas.map((u) => <option key={u} value={u}>{u}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Prompt to search first */}
+                {!donorInfo && !isSearchingDonor && !donorLookupPhone && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Enter donor&apos;s phone number and click &quot;Search&quot; to look them up.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* ── Post Title ── */}
             <div className="space-y-2 sm:col-span-2">
               <label className="text-sm font-medium">
-                Title <RequiredMark />
+                Post Title <span className="text-muted-foreground text-xs">(optional)</span>
               </label>
               <input
                 type="text"
-                placeholder="e.g. Weekend Blood Drive"
+                placeholder="e.g. I donated blood — a life was saved"
                 value={form.title}
                 onChange={(e) => handleChange("title", e.target.value)}
                 onBlur={() => handleBlur("title")}
@@ -533,32 +833,10 @@ export function CreatePostForm() {
               <FieldError message={touched.title ? errors.title : undefined} />
             </div>
 
-            {/* Blood Group */}
-            <div className="space-y-2">
+            {/* ── Donation Date (today or past only) ── */}
+            <div className="space-y-2 sm:col-span-2">
               <label className="text-sm font-medium">
-                Blood Group <span className="text-muted-foreground text-xs">(optional)</span>
-              </label>
-              <select
-                value={form.bloodGroup}
-                onChange={(e) => handleChange("bloodGroup", e.target.value)}
-                className={selectClass}
-              >
-                <option value="">Select Blood Group</option>
-                {BLOOD_GROUPS.map((bg) => (
-                  <option key={bg.value} value={bg.value}>
-                    {bg.label}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-muted-foreground">
-                Backend will verify this matches your registered blood group.
-              </p>
-            </div>
-
-            {/* Donation Time */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Available Date & Time <RequiredMark />
+                Donation Date <RequiredMark />
               </label>
               <input
                 type="datetime-local"
@@ -566,8 +844,9 @@ export function CreatePostForm() {
                 onChange={(e) => handleChange("donationTime", e.target.value)}
                 onBlur={() => handleBlur("donationTime")}
                 className={inputClass}
-                min={new Date().toISOString().slice(0, 16)}
+                max={new Date().toISOString().slice(0, 16)}
               />
+              <p className="text-xs text-muted-foreground">When did the donation happen? Date must be today or in the past.</p>
               <FieldError message={touched.donationTime ? errors.donationTime : undefined} />
             </div>
           </>
@@ -673,7 +952,10 @@ export function CreatePostForm() {
           {/* Phone Number */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Contact Number <RequiredMark />
+              Contact Number{" "}
+              {form.type === "BLOOD_DONATION" && donorInfo && !donorInfo.found
+                ? <RequiredMark />
+                : <span className="text-muted-foreground text-xs">(optional)</span>}
             </label>
             <div className="flex">
               <div className="flex h-10 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm font-medium text-muted-foreground select-none">
@@ -683,6 +965,7 @@ export function CreatePostForm() {
                 type="tel"
                 placeholder="1XXXXXXXXX"
                 value={form.phone}
+                disabled={form.type === "BLOOD_DONATION" && user?.role === "USER" && donationTarget === "SELF"}
                 onChange={(e) => {
                   let digits = e.target.value.replace(/\D/g, "");
                   if (digits.startsWith("880")) digits = digits.substring(3);
@@ -697,6 +980,9 @@ export function CreatePostForm() {
                 maxLength={10}
               />
             </div>
+            {form.type === "BLOOD_DONATION" && user?.role === "USER" && donationTarget === "SELF" && (
+              <p className="text-[10px] text-muted-foreground mt-1">This is your registered contact number.</p>
+            )}
             <FieldError message={touched.contactNumber ? errors.contactNumber : undefined} />
           </div>
 
@@ -737,8 +1023,10 @@ export function CreatePostForm() {
         <div className="space-y-3 sm:col-span-2 border-t pt-4 mt-1 bg-muted/5 p-4 rounded-xl border border-dashed border-primary/10">
           <p className="text-sm font-bold flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" />
-            Area Selection 
-            {form.type === "BLOOD_FINDING" ? <RequiredMark /> : <span className="text-muted-foreground text-[10px] font-normal uppercase tracking-wider">(optional)</span>}
+            Area Selection
+            {(form.type === "BLOOD_FINDING" || (form.type === "BLOOD_DONATION" && donorInfo && !donorInfo.found))
+              ? <RequiredMark />
+              : <span className="text-muted-foreground text-[10px] font-normal uppercase tracking-wider">(optional)</span>}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Division */}
@@ -845,7 +1133,7 @@ export function CreatePostForm() {
             <div className="flex gap-2">
               <input
                 type="url"
-                placeholder="https://images.unsplash.com/..."
+                placeholder="Paste an image URL here..."
                 value={newImageUrl}
                 onChange={(e) => setNewImageUrl(e.target.value)}
                 onKeyDown={(e) => {

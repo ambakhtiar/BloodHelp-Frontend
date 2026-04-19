@@ -3,7 +3,7 @@ import { ClipboardList, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Donation History | BloodLink Hospital",
+  title: `Donation History | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} Hospital`,
   description: "View all recorded blood donations for your hospital.",
 };
 

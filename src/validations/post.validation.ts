@@ -102,28 +102,28 @@ const bloodFindingSchema = bloodFindingSchemaBase.refine(
   );
 
 // ── BLOOD_DONATION Schema ────────────────────────────────────────────────────
-// Required: title, donationTime, contactNumber
-// bloodGroup is optional (backend checks against user's registered blood group)
 const bloodDonationSchema = z.object({
   type: z.literal("BLOOD_DONATION"),
-  title: z
-    .string({ 
-      required_error: "Title is required for the donation post",
-      invalid_type_error: "Title is required for the donation post"
-    })
-    .trim()
-    .min(5, "Title must be at least 5 characters long")
-    .max(100, "Title cannot exceed 100 characters"),
+  isForSelf: z.boolean().optional().default(true),
+  donorContactNumber: z
+    .string()
+    .regex(BD_PHONE_REGEX, "Please provide a valid Bangladeshi phone number")
+    .optional()
+    .or(z.literal("")),
+  donorName: z.string().trim().optional(),
+  donorBloodGroup: z.enum(BLOOD_GROUPS as unknown as [string, ...string[]]).optional().or(z.literal("")),
+  donorGender: z.enum(["MALE", "FEMALE"]).optional().or(z.literal("")),
+  title: z.string().trim().optional(),
   content: z.string().trim().optional().default(""),
   images: imageUrlSchema,
-  bloodGroup: z.enum(BLOOD_GROUPS as unknown as [string, ...string[]]).optional(),
+  bloodGroup: z.enum(BLOOD_GROUPS as unknown as [string, ...string[]]).optional().or(z.literal("")),
   donationTime: z
     .string({ 
       required_error: "Please specify when you are available to donate",
       invalid_type_error: "Please specify when you are available to donate"
     })
     .min(1, "Please specify when you are available to donate"),
-  contactNumber: contactNumberSchema,
+  contactNumber: contactNumberSchema.optional().or(z.literal("")),
   location: z.string().trim().optional().default(""),
   division: z.string().trim().optional().default(""),
   district: z.string().trim().optional().default(""),

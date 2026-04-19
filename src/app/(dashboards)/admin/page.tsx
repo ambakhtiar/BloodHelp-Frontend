@@ -12,7 +12,7 @@ export default function AdminOverviewPage() {
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-foreground/90">System Overview</h2>
         <p className="text-muted-foreground italic">
-          Track core metrics and user activity across the BloodLink platform.
+          Track core metrics and user activity across the {process.env.NEXT_PUBLIC_APP_NAME_FF}{process.env.NEXT_PUBLIC_APP_NAME_SS} platform.
         </p>
       </div>
       

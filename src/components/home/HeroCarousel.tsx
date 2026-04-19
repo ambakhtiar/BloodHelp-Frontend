@@ -103,7 +103,7 @@ export default function HeroCarousel() {
       className="relative overflow-hidden bg-background py-8 lg:py-12"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      aria-label="Welcome to BloodLink"
+      aria-label={`Welcome to ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`}
     >
       {/* Dynamic Background Gradients */}
       <div

@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import { DonorSearchContainer } from "@/features/donors/components/DonorSearchContainer";
 import { Search, Heart, UserCheck } from "lucide-react";
+import { DonorStatsRow } from "@/features/donors/components/DonorStatsRow";
 
 export const metadata: Metadata = {
-  title: "Search Donors - BloodLink",
+  title: `Search Donors - ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
   description: "Find blood donors in Bangladesh by blood group, division, district, or area. Connect with volunteers and save lives.",
   keywords: ["blood donor search", "find blood donors bangladesh", "blood link donors", "emergency blood"],
 };
@@ -30,20 +31,7 @@ export default function DonorsPage() {
               Searching for blood is now easier and faster. Use our advanced filters to find verified donors in your specific area across Bangladesh.
             </p>
 
-            <div className="flex flex-wrap gap-6 mt-8">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-sm font-semibold text-foreground">Live Database</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-sm font-semibold text-foreground">8,000+ Potential Donors</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                <span className="text-sm font-semibold text-foreground">Verified Contacts</span>
-              </div>
-            </div>
+            <DonorStatsRow />
           </div>
         </div>
       </section>
@@ -65,7 +53,7 @@ export default function DonorsPage() {
           </p>
           <hr className="border-primary/5 mb-6" />
           <p className="text-xs text-muted-foreground italic">
-            BloodLink strictly prohibits the sale of blood. All donations should be voluntary and selfless.
+            {process.env.NEXT_PUBLIC_APP_NAME_FF}{process.env.NEXT_PUBLIC_APP_NAME_SS} strictly prohibits the sale of blood. All donations should be voluntary and selfless.
           </p>
         </div>
       </section>

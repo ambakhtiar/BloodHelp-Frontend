@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Payment Successful - BloodLink",
+  title: `Payment Successful - ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
 };
 
 export default async function PaymentSuccessPage({

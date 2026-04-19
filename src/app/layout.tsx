@@ -12,8 +12,8 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: {
-    default: "BloodLink — Blood Donors Management System",
-    template: "%s | BloodLink",
+    default: `${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} — Blood Donors Management System`,
+    template: `%s | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
   },
   description:
     "Connect blood donors with those in need. A platform for managing blood donations, finding donors, and supporting medical crowdfunding.",

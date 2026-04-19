@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import VolunteersTable from "@/features/organisation/components/VolunteersTable";
 
 export const metadata = {
-  title: "Manage Volunteers | BloodLink Organisation",
+  title: `Manage Volunteers | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} Organisation`,
   description: "View and manage your registered blood donor volunteers.",
 };
 

@@ -19,6 +19,8 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 // Donor Ranking Logic
@@ -161,24 +163,80 @@ export default function PublicProfilePage() {
                   </div>
                 )}
 
-                {user.donorProfile && (
+                {(user.donorProfile || user.bloodDonor) && (
                   <div className="pt-5 border-t border-primary/5 space-y-4">
                      <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold text-muted-foreground">Blood Group</span>
                         <Badge className="bg-primary text-primary-foreground font-bold px-3 py-0.5 shadow-sm">
-                          {user.donorProfile.bloodGroup.replace("_POSITIVE", "+").replace("_NEGATIVE", "-")}
+                          {(user.donorProfile?.bloodGroup || user.bloodDonor?.bloodGroup || "").replace("_POSITIVE", "+").replace("_NEGATIVE", "-")}
                         </Badge>
                      </div>
                      <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold text-muted-foreground">Availability</span>
-                        <Badge variant={user.donorProfile.isAvailableForDonation ? "default" : "secondary"} className={cn("font-bold text-xs shadow-sm", user.donorProfile.isAvailableForDonation ? "bg-emerald-500 hover:bg-emerald-600" : "")}>
-                          {user.donorProfile.isAvailableForDonation ? "Ready to Donate" : "Resting"}
+                        <Badge variant={(user.donorProfile?.isAvailableForDonation ?? user.bloodDonor?.isAvailable) ? "default" : "secondary"} className={cn("font-bold text-xs shadow-sm", (user.donorProfile?.isAvailableForDonation ?? user.bloodDonor?.isAvailable) ? "bg-emerald-500 hover:bg-emerald-600" : "")}>
+                          {(user.donorProfile?.isAvailableForDonation ?? user.bloodDonor?.isAvailable) ? "Ready to Donate" : "Resting"}
                         </Badge>
+                     </div>
+                     <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-muted-foreground">Last Donation</span>
+                        <span className="text-sm font-bold text-foreground">
+                          {user.donorProfile?.lastDonationDate || user.bloodDonor?.lastDonationDate
+                            ? format(new Date(user.donorProfile?.lastDonationDate || user.bloodDonor?.lastDonationDate), "dd MMM, yyyy")
+                            : "Never Donated"}
+                        </span>
                      </div>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Motivational Banner */}
+            {(() => {
+              // Only regular users with a blood donor profile should get the motivation message
+              if (user.role !== 'USER' || (!user.donorProfile && !user.bloodDonor)) return null;
+
+              const donationDate = user.donorProfile?.lastDonationDate || user.bloodDonor?.lastDonationDate;
+              let isEligible = false;
+
+              if (!donationDate) {
+                // If they never donated, they are eligible 
+                isEligible = true;
+              } else {
+                const lastDate = new Date(donationDate);
+                const monthsSince = (new Date().getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+                // Get gender from bloodDonor profile. Default to MALE condition if unknown
+                const gender = user.bloodDonor?.gender || 'MALE';
+                const requiredMonths = gender === 'FEMALE' ? 4 : 3;
+                
+                if (monthsSince >= requiredMonths) {
+                  isEligible = true;
+                }
+              }
+
+              if (isEligible) {
+                return (
+                  <Card className="border-emerald-200 shadow-lg overflow-hidden rounded-2xl bg-emerald-50/50 backdrop-blur-md animate-in fade-in zoom-in duration-700">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 border border-emerald-200">
+                          <Heart className="w-5 h-5 text-emerald-600 fill-emerald-600" />
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="font-bold text-emerald-800 text-base">পরোপকারের মহা সুযোগ!</h4>
+                          <p className="text-sm text-emerald-700 font-medium leading-relaxed">
+                            রক্ত দিয়ে মানুষকে সাহায্য করার সুযোগাতা হাতছাড়া করবেন না। আপনি এখন রক্তদানের জন্য একদম উপযুক্ত! চলুন রক্ত দিয়ে মানুষকে সাহায্য করার সুযোগটা মিস না করি।
+                          </p>
+                          <Button asChild size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-8 rounded-lg mt-1 w-fit">
+                            <Link href="/posts/create">চলো রক্ত দেই</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }
+              return null;
+            })()}
 
             <Card className="border-primary/10 shadow-lg overflow-hidden rounded-2xl bg-card/60 backdrop-blur-md">
               <div className="bg-primary/5 p-4 border-b border-primary/10">
@@ -188,7 +246,7 @@ export default function PublicProfilePage() {
               </div>
               <CardContent className="p-6">
                 <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                  Registered on BloodLink as a {user.role.toLowerCase()}. Committed to building a stronger, healthier community through the platform.
+                  Registered on {process.env.NEXT_PUBLIC_APP_NAME_FF}{process.env.NEXT_PUBLIC_APP_NAME_SS} as a {user.role.toLowerCase()}. Committed to building a stronger, healthier community through the platform.
                 </p>
               </CardContent>
             </Card>

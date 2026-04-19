@@ -70,3 +70,10 @@ export const getPublicProfile = async (userId: string): Promise<ApiResponse<any>
   const response = await axiosInstance.get<ApiResponse<any>>(`/users/${userId}`);
   return response.data;
 };
+/**
+ * Fetches the total number of donors
+ */
+export const getDonorCount = async (): Promise<ApiResponse<number>> => {
+  const response = await axiosInstance.get<ApiResponse<number>>("/users/donor-count");
+  return response.data;
+};

@@ -4,8 +4,8 @@ import { Droplets } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Login - BloodLink",
-  description: "Login to your BloodLink account",
+  title: `Login - ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
+  description: `Login to your ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} account`,
 };
 
 export default function LoginPage() {

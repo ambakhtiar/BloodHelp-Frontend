@@ -124,7 +124,7 @@ export function CreateAdminModal() {
                   <Input
                     id={field.name}
                     type="email"
-                    placeholder="admin@bloodlink.com"
+                    placeholder={`admin@${process.env.NEXT_PUBLIC_APP_NAME_FF?.toLowerCase()}${process.env.NEXT_PUBLIC_APP_NAME_SS?.toLowerCase()}.com`}
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}

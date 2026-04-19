@@ -280,7 +280,7 @@ export function PostCard({ post }: PostCardProps) {
     post.author?.bloodDonor?.name ||
     post.author?.hospital?.name ||
     post.author?.organisation?.name ||
-    "BloodLink User";
+    `${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} User`;
 
   const authorRole = post.author?.role;
 
@@ -356,7 +356,7 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <Card
       onClick={handleCardClick}
-      className={`w-full mb-4 shadow-sm border border-primary/5 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20 bg-card group/card cursor-pointer ${
+      className={`w-full mb-4 shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20 bg-card group/card cursor-pointer ${
         post.isResolved ? "opacity-75 grayscale-[0.2]" : ""
       }`}
     >
@@ -375,93 +375,96 @@ export function PostCard({ post }: PostCardProps) {
         </Link>
 
         <div className="flex-1 flex flex-col min-w-0 pt-0.5">
-          <div className="flex justify-between items-start w-full gap-2">
+          <div className="flex items-start w-full gap-2">
             <div className="flex flex-col min-w-0">
               <Link href={`/profile/${post.authorId}`} className="font-semibold text-base leading-tight truncate text-foreground hover:text-primary hover:underline transition-colors w-fit">
                 {authorName}
               </Link>
 
-              <div className="flex flex-wrap gap-1 mt-1 mb-1.5">
-                <Badge className={`${getBadgeStyle(post.type)} text-[10px] h-4 px-1.5`}>
-                  {formatText(post.type)}
-                </Badge>
-                {post.donationTimeType && (
-                  <DonationTimeBadge type={post.donationTimeType} />
-                )}
-                {roleLabel(authorRole) && (
-                  <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 border border-purple-200 text-[10px] h-4 px-1.5 font-medium dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800">
-                    {roleLabel(authorRole)}
+              <div className="flex flex-col gap-1 mt-1 mb-1.5 align-start">
+                <div className="flex flex-wrap gap-1">
+                  <Badge className={`${getBadgeStyle(post.type)} text-[10px] h-4 px-1.5`}>
+                    {formatText(post.type)}
                   </Badge>
-                )}
-                {post.type === "HELPING" && !post.isVerified && (
-                  <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border border-amber-200 text-[10px] h-4 px-1.5 font-medium dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800">
-                    Unverified
-                  </Badge>
-                )}
-                {post.isVerified && (
-                  <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border border-blue-200 text-[10px] h-4 px-1.5 font-medium">
-                    Verified
-                  </Badge>
-                )}
-                {post.isResolved && (
-                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-[10px] h-4 px-1.5 font-medium">
-                    Resolved
-                  </Badge>
-                )}
+                  {post.donationTimeType && (
+                    <DonationTimeBadge type={post.donationTimeType} />
+                  )}
+                  {roleLabel(authorRole) && (
+                    <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 border border-purple-200 text-[10px] h-4 px-1.5 font-medium dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800">
+                      {roleLabel(authorRole)}
+                    </Badge>
+                  )}
+                  {post.type === "HELPING" && !post.isVerified && (
+                    <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border border-amber-200 text-[10px] h-4 px-1.5 font-medium dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800">
+                      Unverified
+                    </Badge>
+                  )}
+                  {post.isVerified && (
+                    <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border border-blue-200 text-[10px] h-4 px-1.5 font-medium">
+                      Verified
+                    </Badge>
+                  )}
+                  {post.isResolved && (
+                    <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-[10px] h-4 px-1.5 font-medium">
+                      Resolved
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground w-max whitespace-nowrap mt-0.5">
+                  {timeAgo}
+                </span>
               </div>
             </div>
             
-            {/* Options Menu for Author and Admin */}
-            {(user?.id === post.authorId || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN") && (
-              <div className="flex gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    {user?.id === post.authorId && (
+            <div className="flex items-start ml-auto shrink-0">
+              {/* Options Menu for Author and Admin */}
+              {(user?.id === post.authorId || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN") && (
+                <div className="flex gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-primary/10 transition-colors">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      {user?.id === post.authorId && (
+                        <DropdownMenuItem 
+                          className="cursor-pointer gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsEditModalOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" /> Edit Post
+                        </DropdownMenuItem>
+                      )}
+                      
+                      {/* Resolve Option for Author or Admin */}
+                      {["BLOOD_FINDING", "HELPING"].includes(post.type) && !post.isResolved && (
+                        <DropdownMenuItem 
+                          className="cursor-pointer gap-2 text-emerald-600 focus:text-emerald-700"
+                          onClick={handleResolve}
+                          disabled={resolveMutation.isPending}
+                        >
+                          <CheckCircle className="h-4 w-4" /> 
+                          {resolveMutation.isPending ? "Resolving..." : "Mark as Resolved"}
+                        </DropdownMenuItem>
+                      )}
+
                       <DropdownMenuItem 
-                        className="cursor-pointer gap-2"
+                        className="cursor-pointer gap-2 text-destructive focus:text-destructive"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setIsEditModalOpen(true);
+                          setIsDeleteDialogOpen(true)
                         }}
                       >
-                        <Pencil className="h-4 w-4" /> Edit Post
+                        <Trash2 className="h-4 w-4" /> Delete Post
                       </DropdownMenuItem>
-                    )}
-                    
-                    {/* Resolve Option for Author or Admin */}
-                    {["BLOOD_FINDING", "HELPING"].includes(post.type) && !post.isResolved && (
-                      <DropdownMenuItem 
-                        className="cursor-pointer gap-2 text-emerald-600 focus:text-emerald-700"
-                        onClick={handleResolve}
-                        disabled={resolveMutation.isPending}
-                      >
-                        <CheckCircle className="h-4 w-4" /> 
-                        {resolveMutation.isPending ? "Resolving..." : "Mark as Resolved"}
-                      </DropdownMenuItem>
-                    )}
-
-                    <DropdownMenuItem 
-                      className="cursor-pointer gap-2 text-destructive focus:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsDeleteDialogOpen(true)
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" /> Delete Post
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-
-            <span className="text-[11px] text-muted-foreground whitespace-nowrap mt-0.5 shrink-0">
-              {timeAgo}
-            </span>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Delete Confirmation Dialog */}
@@ -663,7 +666,7 @@ export function PostCard({ post }: PostCardProps) {
         )}
       </CardContent>
 
-      <CardFooter className="flex justify-between border-t border-primary/5 p-1 bg-secondary/10">
+      <CardFooter className="flex justify-between border-t border-border/40 p-1 bg-muted/5">
         <LikeAction
           postId={post.id}
           initialLikes={post._count?.likes || 0}
