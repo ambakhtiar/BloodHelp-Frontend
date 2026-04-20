@@ -8,6 +8,7 @@ import { changePasswordSchema, type ChangePasswordFormValues } from "@/validatio
 import { changePasswordApi } from "@/services/auth.service";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
+import { toastApiError } from "@/lib/parseApiError";
 
 const inputClass =
   "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
@@ -28,8 +29,8 @@ export default function ChangePasswordForm({ onSuccess, hideOldPassword }: Chang
       refreshUser(); 
       onSuccess?.();
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to change password");
+    onError: (error: unknown) => {
+      toastApiError(error, "Failed to change password. Please check your current password and try again.");
     },
   });
 

@@ -11,6 +11,7 @@ import { setAccessToken } from "@/lib/axiosInstance";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { getDivisions, getDistricts, getUpazilas } from "@/lib/bd-location";
+import { toastApiError } from "@/lib/parseApiError";
 
 const COUNTRY_CODE = "+880";
 
@@ -159,9 +160,8 @@ export function RegisterForm() {
       toast.success("Account created and logged in!");
       router.push("/");
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || error.response?.data?.errorDetails?.message || "Registration failed. User might already exist.";
-      toast.error(message);
+    onError: (error: unknown) => {
+      toastApiError(error, "Registration failed. Please check your details and try again.");
     },
   });
 

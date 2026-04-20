@@ -12,11 +12,26 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: {
-    default: `${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS} — Blood Donation and Crowd Management`,
-    template: `%s | ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`,
+    default: `${process.env.NEXT_PUBLIC_APP_NAME_FF || 'Blood'}${process.env.NEXT_PUBLIC_APP_NAME_SS || 'Help'} | Lifesaving Blood Donation & Medical Crowdfunding Platform`,
+    template: `%s | ${process.env.NEXT_PUBLIC_APP_NAME_FF || 'Blood'}${process.env.NEXT_PUBLIC_APP_NAME_SS || 'Help'}`,
   },
   description:
-    "Connect blood donors with those in need. A platform for managing blood donations, finding donors, and supporting medical crowdfunding.",
+    `${process.env.NEXT_PUBLIC_APP_NAME_FF || 'Blood'} ${process.env.NEXT_PUBLIC_APP_NAME_SS || 'Help'} is a comprehensive platform connecting blood donors with patients in emergency need. Features include real-time donor search, hospital donation tracking, organization management and secure medical crowdfunding.`,
+  keywords: [
+    "Blood Donation",
+    "Blood Donors Bangladesh",
+    "Medical Crowdfunding",
+    "Emergency Blood Search",
+    "BloodHelp",
+    "Donate Blood"
+  ],
+  authors: [{ name: "AM Bakhtiar" }],
+  openGraph: {
+    title: `${process.env.NEXT_PUBLIC_APP_NAME_FF || 'Blood'}${process.env.NEXT_PUBLIC_APP_NAME_SS || 'Help'} | Donate Blood, Save Lives`,
+    description: `${process.env.NEXT_PUBLIC_APP_NAME_FF || 'Blood'} ${process.env.NEXT_PUBLIC_APP_NAME_SS || 'Help'} is a comprehensive platform connecting blood donors with patients in emergency need. Features include real-time donor search, hospital donation tracking, organization management and secure medical crowdfunding.`,
+    type: "website",
+    locale: "en_US",
+  },
 };
 
 export default function RootLayout({

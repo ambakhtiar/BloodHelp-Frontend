@@ -11,6 +11,7 @@ import { createPost, checkDonorByPhone } from "@/services/post.service";
 import { getDivisions, getDistricts, getUpazilas } from "@/lib/bd-location";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/providers/AuthProvider";
+import { toastApiError } from "@/lib/parseApiError";
 
 // ── Styling Classes (consistent with RegisterForm) ───────────────────────────
 const inputClass =
@@ -308,12 +309,8 @@ export function CreatePostForm() {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       router.push("/feed");
     },
-    onError: (error: any) => {
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.errorDetails?.message ||
-        "Failed to create post. Please try again.";
-      toast.error(message);
+    onError: (error: unknown) => {
+      toastApiError(error, "Failed to create post. Please try again.");
     },
   });
 

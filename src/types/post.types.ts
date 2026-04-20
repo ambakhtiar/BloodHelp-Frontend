@@ -1,26 +1,7 @@
-// ── Post Type Enums ──────────────────────────────────────────────────────────
-export enum PostType {
-  BLOOD_FINDING = "BLOOD_FINDING",
-  BLOOD_DONATION = "BLOOD_DONATION",
-  HELPING = "HELPING",
-}
+import { BloodGroup, PostType, DonationTimeType } from "./common.types";
+export { BloodGroup, PostType, DonationTimeType };
+import { IUser, IBloodDonor, IHospital, IOrganisation } from "./user.types";
 
-export enum DonationTimeType {
-  EMERGENCY = "EMERGENCY",
-  FIXED = "FIXED",
-  FLEXIBLE = "FLEXIBLE",
-}
-
-export enum BloodGroup {
-  A_POSITIVE = "A_POSITIVE",
-  A_NEGATIVE = "A_NEGATIVE",
-  B_POSITIVE = "B_POSITIVE",
-  B_NEGATIVE = "B_NEGATIVE",
-  AB_POSITIVE = "AB_POSITIVE",
-  AB_NEGATIVE = "AB_NEGATIVE",
-  O_POSITIVE = "O_POSITIVE",
-  O_NEGATIVE = "O_NEGATIVE",
-}
 
 // ── Display Maps ─────────────────────────────────────────────────────────────
 export const bloodGroupDisplayMap: Record<BloodGroup, string> = {
@@ -105,5 +86,47 @@ export interface IPostResponse {
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;
+  };
+}
+
+export interface IPost {
+  id: string;
+  authorId: string;
+  type: PostType;
+  title: string | null;
+  content: string | null;
+  images: string[];
+  contactNumber: string | null;
+  location: string | null;
+  division: string | null;
+  district: string | null;
+  upazila: string | null;
+  area: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  bloodGroup: BloodGroup | null;
+  bloodBags: number | null;
+  reason: string | null;
+  donationTimeType: DonationTimeType | null;
+  donationTime: string | null;
+  hemoglobin: number | null;
+  medicalIssues: string | null;
+  targetAmount: number | null;
+  raisedAmount: number | null;
+  bkashNagadNumber: string | null;
+  isVerified: boolean;
+  isApproved: boolean;
+  isResolved: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  author: Pick<IUser, "id" | "email" | "contactNumber" | "role"> & {
+    bloodDonor?: IBloodDonor | null;
+    hospital?: IHospital | null;
+    organisation?: IOrganisation | null;
+  };
+  _count: {
+    likes: number;
+    comments: number;
   };
 }

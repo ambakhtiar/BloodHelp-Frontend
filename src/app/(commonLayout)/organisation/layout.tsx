@@ -3,7 +3,7 @@ import { RoleGuard } from "@/components/shared/RoleGuard";
 
 export default function OrganisationLayout({ children }: { children: ReactNode }) {
   return (
-    <RoleGuard allowedRoles={["ORGANISATION", "ADMIN", "SUPER_ADMIN"]}>
+    <RoleGuard allowedRoles={["ORGANISATION"]}>
       {children}
     </RoleGuard>
   );

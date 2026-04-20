@@ -11,6 +11,7 @@ import { setAccessToken } from "@/lib/axiosInstance";
 import { fetchCurrentUser } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/providers/AuthProvider";
+import { parseApiError } from "@/lib/parseApiError";
 import Link from "next/link";
 
 const inputClass =
@@ -59,10 +60,13 @@ export function LoginForm() {
       toast.success("Logged in successfully!");
       router.push(callbackUrl || "/");
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || "Login failed, please try again.";
-      setServerError(message);
-      toast.error(message);
+    onError: (error: unknown) => {
+      const parsed = parseApiError(error);
+      // Build a combined message: headline + first detail if any
+      const fullMessage = parsed.details.length > 0
+        ? `${parsed.headline} ${parsed.details[0]}`
+        : parsed.headline;
+      setServerError(fullMessage);
     },
   });
 

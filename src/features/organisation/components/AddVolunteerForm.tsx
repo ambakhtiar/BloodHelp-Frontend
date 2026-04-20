@@ -14,6 +14,7 @@ import { checkDonorByPhone } from "@/services/post.service";
 import { BloodGroup, Gender, IAddVolunteerPayload } from "@/types";
 import { Button } from "@/components/ui/button";
 import { getDivisions, getDistricts, getUpazilas } from "@/lib/bd-location";
+import { toastApiError } from "@/lib/parseApiError";
 
 const COUNTRY_CODE = "+880";
 
@@ -88,9 +89,8 @@ export default function AddVolunteerForm() {
       queryClient.invalidateQueries({ queryKey: ["volunteers"] });
       router.push("/organisation/volunteers");
     },
-    onError: (err: any) => {
-      const errorMessage = err?.response?.data?.message || err.message || "Failed to add volunteer.";
-      toast.error(errorMessage);
+    onError: (error: unknown) => {
+      toastApiError(error, "Failed to add volunteer. Please try again.");
     },
   });
 

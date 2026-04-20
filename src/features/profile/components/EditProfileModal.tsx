@@ -8,6 +8,7 @@ import { useAuthContext } from "@/providers/AuthProvider";
 import { updateProfileSchema, type UpdateProfileFormValues } from "@/validations/user.validation";
 import { updateMyProfile } from "@/services/user.service";
 import { uploadImage } from "@/services/upload.service";
+import { toastApiError } from "@/lib/parseApiError";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { IUser } from "@/types";
@@ -99,16 +100,8 @@ export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProp
         toast.error(response.message || "Failed to update profile");
       }
     },
-    onError: (error: any) => {
-      const data = error?.response?.data;
-      if (data?.errorSources && Array.isArray(data.errorSources)) {
-        // Show first 3 errors to avoid toast spam
-        data.errorSources.slice(0, 3).forEach((source: any) => {
-          toast.error(`${source.path}: ${source.message}`);
-        });
-      } else {
-        toast.error(data?.message || "Something went wrong while updating");
-      }
+    onError: (error: unknown) => {
+      toastApiError(error, "Failed to update profile. Please try again.");
     },
   });
 
