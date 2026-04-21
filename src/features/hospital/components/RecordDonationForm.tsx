@@ -5,7 +5,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, PlusCircle, User, Phone, MapPin, Droplet, UserCircle, Image, FileText, CheckCircle2 } from "lucide-react";
+import { Loader2, PlusCircle, User, Phone, MapPin, Droplet, UserCircle, FileText, CheckCircle2 } from "lucide-react";
+import ImageUploader from "@/components/shared/ImageUploader";
 
 import { recordDonation } from "@/services/hospital.service";
 import { BloodGroup, Gender } from "@/types";
@@ -58,7 +59,7 @@ export function RecordDonationForm() {
       upazila: "",
       createPost: false,
       postTitle: "A life saved today!",
-      postImages: "",
+      postImages: [] as string[],
       postContent: "",
     },
     onSubmit: async ({ value }) => {
@@ -67,13 +68,7 @@ export function RecordDonationForm() {
         return;
       }
 
-      // Convert image string to array
-      const payload = {
-        ...value,
-        postImages: value.postImages ? value.postImages.split(',').map(s => s.trim()).filter(Boolean) : [],
-      };
-
-      mutation.mutate(payload);
+      mutation.mutate(value);
     },
   });
 
@@ -419,18 +414,13 @@ export function RecordDonationForm() {
                   name="postImages"
                   children={(field) => (
                     <div className="space-y-2">
-                      <Label htmlFor={field.name} className="flex items-center gap-2 font-bold text-slate-700 text-sm">
-                        <Image className="w-4 h-4" /> Image URLs
+                      <Label className="flex items-center gap-2 font-bold text-slate-700 text-sm">
+                        Post Images <span className="text-slate-400 font-normal">(Optional)</span>
                       </Label>
-                      <Input
-                        id={field.name}
-                        placeholder="URL1, URL2 (Comma separated)"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className="bg-white border-slate-200"
+                      <ImageUploader
+                        value={field.state.value as string[]}
+                        onChange={(urls) => field.handleChange(urls as unknown as string[])}
                       />
-                      <p className="text-[10px] text-slate-400">Add image URLs separated by commas for the post gallery.</p>
                     </div>
                   )}
                 />

@@ -726,59 +726,14 @@ export function CreatePostForm() {
                         </select>
                       </div>
                     </div>
-                    {/* B-1: Contact Number (required for unregistered donor) */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium">Donor Contact Number <RequiredMark /></label>
-                      <p className="text-[10px] text-muted-foreground">Used to identify this donor if they register later.</p>
-                    </div>
-                    {/* B-1: Location (required) */}
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5" /> Donor Location <RequiredMark />
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {/* Division */}
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-muted-foreground">Division</label>
-                          <select
-                            value={form.division}
-                            onChange={(e) => handleChange("division", e.target.value)}
-                            className={selectClass}
-                          >
-                            <option value="">Select Division</option>
-                            {divisions.map((d) => <option key={d} value={d}>{d}</option>)}
-                          </select>
-                        </div>
-                        {/* District */}
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-muted-foreground">District</label>
-                          <select
-                            value={form.district}
-                            onChange={(e) => handleChange("district", e.target.value)}
-                            className={selectClass}
-                            disabled={!form.division}
-                          >
-                            <option value="">{form.division ? "Select District" : "Select division first"}</option>
-                            {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-                          </select>
-                        </div>
-                        {/* Upazila */}
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-muted-foreground">Upazila</label>
-                          <select
-                            value={form.upazila}
-                            onChange={(e) => handleChange("upazila", e.target.value)}
-                            className={selectClass}
-                            disabled={!form.district}
-                          >
-                            <option value="">{form.district ? "Select Upazila" : "Select district first"}</option>
-                            {upazilas.map((u) => <option key={u} value={u}>{u}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
+                    {/* ↓ Contact number and area selection are in the common fields below (required for this case) */}
+                    <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mt-1">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      Please fill in the Contact Number and Area Selection fields below — they are required since this donor is not on the platform.
+                    </p>
                   </div>
                 )}
+
 
                 {/* Prompt to search first */}
                 {!donorInfo && !isSearchingDonor && !donorLookupPhone && (

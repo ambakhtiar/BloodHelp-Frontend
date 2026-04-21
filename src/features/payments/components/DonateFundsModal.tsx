@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useForm } from "@tanstack/react-form";
+import { useForm, useStore } from "@tanstack/react-form";
 import { z } from "zod";
 import { Heart, Loader2, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -44,7 +43,6 @@ export function DonateFundsModal({
   targetAmount,
   raisedAmount = 0,
 }: DonateFundsModalProps) {
-  const [submitted, setSubmitted] = useState(false);
   const progressPct =
     targetAmount && targetAmount > 0
       ? Math.min((raisedAmount / targetAmount) * 100, 100)
@@ -71,19 +69,15 @@ export function DonateFundsModal({
   const form = useForm({
     defaultValues: { amount: "" as unknown as number },
     onSubmit: async ({ value }) => {
-      const result = donateSchema.safeParse({ amount: Number(value.amount) });
-      if (!result.success) {
-        toast.error(result.error.issues[0].message);
-        return;
-      }
-      setSubmitted(true);
-
       mutation.mutate({ 
         postId, 
-        amount: result.data.amount
+        amount: Number(value.amount)
       });
     },
   });
+  
+  // Watch amount value for button reactivity
+  const currentAmount = useStore(form.store, (state) => state.values.amount);
 
   const quickAmounts = [50, 100, 250, 500, 1000];
 
@@ -205,9 +199,8 @@ export function DonateFundsModal({
               className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold gap-2 shadow-lg shadow-blue-500/20"
               disabled={
                 mutation.isPending || 
-                submitted || 
-                (targetAmount ? Number(form.getFieldValue("amount")) > (targetAmount - raisedAmount) : false) ||
-                Number(form.getFieldValue("amount")) < 10
+                (targetAmount ? Number(currentAmount) > (targetAmount - raisedAmount) : false) ||
+                Number(currentAmount) < 10
               }
             >
               {mutation.isPending ? (
