@@ -46,10 +46,10 @@ export function parseApiError(error: any): ParsedApiError {
   const status: number = error.response.status ?? 500;
   const data = error.response.data ?? {};
 
-  // 401 / 403 — always use safe messages, never echo backend details
+  // 401 / 403 — use safe messages by default, but allow explicit backend messages
   if (status === 401 || status === 403) {
     return {
-      headline: SAFE_MESSAGES[status],
+      headline: data?.message || SAFE_MESSAGES[status],
       details: [],
       status,
     };

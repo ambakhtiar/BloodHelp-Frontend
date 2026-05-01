@@ -1,6 +1,6 @@
 export type UserRole = "SUPER_ADMIN" | "ADMIN" | "HOSPITAL" | "ORGANISATION" | "USER";
 
-export type AccountStatus = "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED";
+export type AccountStatus = "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED" | "INCOMPLETE";
 
 export type Gender = "MALE" | "FEMALE";
 

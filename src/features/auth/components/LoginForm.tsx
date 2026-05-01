@@ -4,15 +4,17 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, AlertTriangle, XCircle } from "lucide-react";
+import { Loader2, AlertTriangle, XCircle, User, Building, Heart } from "lucide-react";
 import { loginSchema } from "@/validations/auth.validation";
-import { loginApi } from "@/services/auth.service";
+import { loginApi, googleLoginApi } from "@/services/auth.service";
 import { setAccessToken } from "@/lib/axiosInstance";
 import { fetchCurrentUser } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { parseApiError } from "@/lib/parseApiError";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import Link from "next/link";
+
 
 const inputClass =
   "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
@@ -70,6 +72,34 @@ export function LoginForm() {
     },
   });
 
+  const googleMutation = useMutation({
+    mutationFn: googleLoginApi,
+    onSuccess: async (data: any) => {
+      if (data?.data?.accessToken) setAccessToken(data.data.accessToken);
+      
+      const user = data?.data?.user;
+      const isNewUser = data?.data?.isNewUser;
+      
+      if (user) {
+        setUser(user);
+        
+        if (isNewUser || user.accountStatus === "INCOMPLETE") {
+          toast.success("Google account created! Please complete your profile.");
+          router.replace("/auth/complete-profile");
+        } else {
+          toast.success("Logged in with Google!");
+          router.replace(callbackUrl || "/");
+        }
+      } else {
+        toast.error("User data missing in response.");
+      }
+    },
+    onError: (error: unknown) => {
+      const parsed = parseApiError(error);
+      toast.error(parsed.headline);
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const result = loginSchema.safeParse(formData);
@@ -85,8 +115,20 @@ export function LoginForm() {
     mutation.mutate(result.data);
   };
 
+  const handleDemoLogin = (email: string) => {
+    const testData = { emailOrPhone: email, password: "112233" };
+    setFormData(testData);
+    setErrors({});
+    setServerError(null);
+    const result = loginSchema.safeParse(testData);
+    if (result.success) {
+      mutation.mutate(result.data);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
       {serverError && (
         <div className="flex animate-in fade-in slide-in-from-top-2 duration-300 items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive shadow-sm">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
@@ -150,5 +192,57 @@ export function LoginForm() {
         Sign In
       </Button>
     </form>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-muted-foreground/20" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground font-medium">Or continue with</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center justify-center gap-4 py-2">
+        <div className="w-full">
+          <GoogleLogin
+            onSuccess={async (credentialResponse: CredentialResponse) => {
+              if (credentialResponse.credential) {
+                googleMutation.mutate(credentialResponse.credential);
+              }
+            }}
+            onError={() => {
+              toast.error("Google Sign-In failed. Please try again.");
+            }}
+            useOneTap
+            width="100%"
+            theme="outline"
+            shape="rectangular"
+            text="signin_with"
+          />
+        </div>
+      </div>
+
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-muted-foreground/20" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground font-medium">Demo Accounts</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('user@demo.com')} disabled={mutation.isPending}>
+          <User className="mr-2 h-3.5 w-3.5" /> User
+        </Button>
+        <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('hospital@demo.com')} disabled={mutation.isPending}>
+          <Building className="mr-2 h-3.5 w-3.5" /> Hospital
+        </Button>
+        <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('org@demo.com')} disabled={mutation.isPending}>
+          <Heart className="mr-2 h-3.5 w-3.5" /> Organisation
+        </Button>
+      </div>
+    </div>
   );
 }

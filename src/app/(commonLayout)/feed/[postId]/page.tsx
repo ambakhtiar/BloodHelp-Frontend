@@ -13,10 +13,8 @@ export default async function PostDetailsPage({
 }) {
   const resolvedParams = await params;
   return (
-    <RoleGuard allowedRoles={["USER", "HOSPITAL", "ORGANISATION", "ADMIN", "SUPER_ADMIN"]}>
-      <main className="min-h-screen bg-background">
-        <PostDetailsContainer postId={resolvedParams.postId} />
-      </main>
-    </RoleGuard>
+    <main className="min-h-screen bg-background">
+      <PostDetailsContainer postId={resolvedParams.postId} />
+    </main>
   );
 }

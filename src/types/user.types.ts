@@ -8,6 +8,8 @@ export interface IUser {
   role: UserRole;
   accountStatus: AccountStatus;
   needsPasswordChange: boolean;
+  authProvider: string | null;
+  googleName?: string;
   division: string | null;
   district: string | null;
   upazila: string | null;

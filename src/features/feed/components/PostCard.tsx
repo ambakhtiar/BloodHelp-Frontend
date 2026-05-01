@@ -332,12 +332,6 @@ export function PostCard({ post }: PostCardProps) {
       return;
     }
 
-    if (!user) {
-      toast.error("Please login to view details");
-      router.push(`/auth/login?callbackUrl=/feed/${post.id}`);
-      return;
-    }
-
     // Prevent redirect if already on the post details page
     if (pathname === `/feed/${post.id}`) return;
 
@@ -345,11 +339,6 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   const handleCommentClick = () => {
-    if (!user) {
-      toast.error("Please login to see and write comments");
-      router.push(`/auth/login?callbackUrl=/feed/${post.id}`);
-      return;
-    }
     router.push(`/feed/${post.id}`);
   };
 

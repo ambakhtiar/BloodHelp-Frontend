@@ -8,11 +8,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Droplets } from "lucide-react";
 import { silentRefresh, removeAccessToken } from "../lib/axiosInstance";
 import { fetchCurrentUser, logoutApi } from "../services/auth.service";
 import type { IUser } from "../types";
+
 
 // ---------- Context Type ----------
 export interface AuthContextType {
@@ -64,8 +65,16 @@ function AuthLoadingScreen() {
 // ---------- Provider ----------
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Forced profile completion guard
+  useEffect(() => {
+    if (!isLoading && user && user.accountStatus === "INCOMPLETE" && pathname !== "/auth/complete-profile") {
+      router.replace("/auth/complete-profile");
+    }
+  }, [user, isLoading, pathname, router]);
 
   // On mount: attempt silent refresh to restore session
   useEffect(() => {
@@ -84,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initAuth();
   }, []);
+
 
   const logout = useCallback(async () => {
     try {

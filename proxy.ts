@@ -7,7 +7,7 @@ const protectedRoutes = {
   hospital: ['/hospital', '/dashboard/hospital'],
   organisation: ['/organisation', '/dashboard/organisation'],
   user: ['/user', '/user/donation-history'],
-  authenticated: ['/posts/create', '/profile', '/settings', '/donors', '/feed/*'],
+  authenticated: ['/posts/create', '/profile', '/settings', '/donors'],
 };
 
 export async function proxy(request: NextRequest) {

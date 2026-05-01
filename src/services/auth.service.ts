@@ -14,6 +14,13 @@ export const loginApi = async (payload: LoginFormValues): Promise<any> => {
   return response.data;
 };
 
+// ---------- Google Login ----------
+export const googleLoginApi = async (idToken: string): Promise<any> => {
+  const response = await axiosInstance.post("/auth/google", { idToken });
+  return response.data;
+};
+
+
 // ---------- Register ----------
 export const registerApi = async (payload: RegisterFormValues): Promise<any> => {
   const body: any = {
@@ -90,3 +97,10 @@ export const changePasswordApi = async (payload: any): Promise<any> => {
   const response = await axiosInstance.post("/auth/change-password", payload);
   return response.data;
 };
+
+// ---------- Complete Profile (for Google Users) ----------
+export const completeProfileApi = async (payload: any): Promise<any> => {
+  const response = await axiosInstance.patch("/users/complete-profile", payload);
+  return response.data;
+};
+

@@ -19,6 +19,9 @@ export interface IAdminAnalytics {
   blockedUser: number;
   rejectedUser: number;
   totalAdmin: number;
+  donorsByBloodGroup: { bloodGroup: string; count: number }[];
+  donorsByDivision: { division: string; count: number }[];
+  donorsByDivisionAndBloodGroup: { division: string; bloodGroup: string; count: number }[];
 }
 
 export interface IManageAdminResponse {

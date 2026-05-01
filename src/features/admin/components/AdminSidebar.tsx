@@ -10,7 +10,8 @@ import {
   Settings as SettingsLogo,
   LayoutDashboard,
   Building2,
-  Users
+  Users,
+  BarChart3
 } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
 
@@ -19,6 +20,11 @@ const mainNavItems = [
     title: "Overview",
     href: "/admin",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Donor Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
   },
   {
     title: "Manage Hospitals",

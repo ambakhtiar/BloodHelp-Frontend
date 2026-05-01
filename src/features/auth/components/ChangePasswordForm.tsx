@@ -19,7 +19,20 @@ interface ChangePasswordFormProps {
 }
 
 export default function ChangePasswordForm({ onSuccess, hideOldPassword }: ChangePasswordFormProps) {
-  const { refreshUser } = useAuthContext();
+  const { user, refreshUser } = useAuthContext();
+
+  if (user?.authProvider === "google") {
+    return (
+      <div className="p-4 rounded-lg bg-muted/50 border border-dashed text-center space-y-2">
+        <Lock className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
+        <p className="text-sm font-medium">Password managed by Google</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Your account is authenticated via Google OAuth. You do not have a local password to change.
+        </p>
+      </div>
+    );
+  }
+
 
   const mutation = useMutation({
     mutationFn: changePasswordApi,

@@ -100,7 +100,7 @@ export default function HeroCarousel() {
 
   return (
     <section
-      className="relative overflow-hidden bg-background py-8 lg:py-12"
+      className="relative overflow-hidden bg-background py-4 lg:py-6"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       aria-label={`Welcome to ${process.env.NEXT_PUBLIC_APP_NAME_FF}${process.env.NEXT_PUBLIC_APP_NAME_SS}`}
@@ -120,10 +120,10 @@ export default function HeroCarousel() {
 
       {/* Main Content Container */}
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-10 lg:gap-8 items-start md:items-center min-h-[26rem] sm:min-h-[22.5rem] md:min-h-[auto]">
+        <div className="grid md:grid-cols-2 gap-10 lg:gap-8 items-start md:items-center min-h-[22rem] sm:min-h-[20rem] md:min-h-[auto]">
 
           {/* Left Text Content */}
-          <div className="flex flex-col justify-start space-y-6 md:space-y-7 z-10 pt-6 pb-2 sm:pt-8 md:pt-12 h-[26rem] sm:h-[22.5rem] md:h-auto">
+          <div className="flex flex-col justify-start space-y-4 md:space-y-5 z-10 pt-4 pb-2 sm:pt-6 md:pt-8 h-[22rem] sm:h-[20rem] md:h-[60vh] md:max-h-[30rem] justify-center">
             {/* Badge */}
             <div
               key={`badge-${slide.id}`}
@@ -137,7 +137,7 @@ export default function HeroCarousel() {
 
             {/* Typography */}
             <div className="space-y-3">
-              <div className="h-[5.5rem] sm:h-[6.5rem] md:h-[8rem] lg:h-[9rem] flex flex-col justify-end">
+              <div className="h-[5rem] sm:h-[6rem] md:h-[7rem] lg:h-[8rem] flex flex-col justify-end">
                 <h1
                   key={`title-${slide.id}`}
                   className="animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground drop-shadow-sm leading-tight"
@@ -145,7 +145,7 @@ export default function HeroCarousel() {
                   {slide.title}
                 </h1>
               </div>
-              <div className="h-[4.5rem] sm:h-[4rem] md:h-[5rem] lg:h-[5rem]">
+              <div className="h-auto min-h-[3.5rem]">
                 <p
                   key={`sub-${slide.id}`}
                   className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 text-base sm:text-lg text-muted-foreground max-w-lg leading-relaxed"

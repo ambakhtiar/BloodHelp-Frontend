@@ -86,3 +86,28 @@ export const changePasswordSchema = z
   });
 
 export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
+
+// ---------- Complete Profile Schema ----------
+export const completeProfileSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  contactNumber: z
+    .string()
+    .min(1, "Phone number is required")
+    .regex(bdPhoneRegex, "Enter a valid Bangladesh phone (+8801XXXXXXXXX)"),
+  division: z.string().min(1, "Division is required"),
+  district: z.string().min(1, "District is required"),
+  upazila: z.string().min(1, "Upazila is required"),
+  bloodGroup: z.enum(
+    ["A_POSITIVE", "A_NEGATIVE", "B_POSITIVE", "B_NEGATIVE", "AB_POSITIVE", "AB_NEGATIVE", "O_POSITIVE", "O_NEGATIVE"],
+    { required_error: "Blood group is required", invalid_type_error: "Blood group is required" }
+  ),
+  gender: z.enum(["MALE", "FEMALE"], { required_error: "Gender is required", invalid_type_error: "Gender is required" }),
+  weight: z.preprocess((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(30, "Weight must be at least 30kg").max(200, "Weight must be less than 200kg").optional()),
+});
+
+export type CompleteProfileFormValues = z.infer<typeof completeProfileSchema>;
+
