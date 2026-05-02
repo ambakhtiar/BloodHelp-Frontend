@@ -4,14 +4,22 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, AlertTriangle, Clock, Heart, HandHelping, MapPin, Search, UserCheck, UserX } from "lucide-react";
+import { Loader2, AlertTriangle, Clock, Heart, HandHelping, MapPin, Search, UserCheck, UserX, Sparkles } from "lucide-react";
 import ImageUploader from "@/components/shared/ImageUploader";
 import { createPostSchema, type CreatePostFormValues } from "@/validations/post.validation";
 import { createPost, checkDonorByPhone } from "@/services/post.service";
+import { parseBloodPostWithAI } from "@/services/ai.service";
 import { getDivisions, getDistricts, getUpazilas } from "@/lib/bd-location";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { toastApiError } from "@/lib/parseApiError";
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const getLocalISOString = () => {
+  const now = new Date();
+  const tzoffset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - tzoffset).toISOString().slice(0, 16);
+};
 
 // ── Styling Classes (consistent with RegisterForm) ───────────────────────────
 const inputClass =
@@ -111,6 +119,30 @@ export function CreatePostForm() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const [aiPrompt, setAiPrompt] = useState("");
+  const parseAIMutation = useMutation({
+    mutationFn: parseBloodPostWithAI,
+    onSuccess: (data) => {
+      setForm((prev) => ({
+        ...prev,
+        bloodGroup: data.bloodGroup || prev.bloodGroup,
+        bloodBags: data.bloodBags ? String(data.bloodBags) : prev.bloodBags,
+        reason: data.reason || prev.reason,
+        donationTimeType: data.donationTimeType || prev.donationTimeType,
+        location: data.location || prev.location,
+        division: data.division || prev.division,
+        district: data.district || prev.district,
+        upazila: data.upazila || prev.upazila,
+        content: data.content || prev.content,
+      }));
+      toast.success("AI has filled the form! Please review.");
+      setAiPrompt("");
+    },
+    onError: (error) => {
+      toastApiError(error, "Failed to parse with AI");
+    },
+  });
 
   const [donationTarget, setDonationTarget] = useState<"SELF" | "OTHER">("SELF");
 
@@ -331,7 +363,10 @@ export function CreatePostForm() {
       });
       setErrors(fieldErrors);
       setTouched((p) => ({ ...p, ...allTouched }));
-      toast.error("Please fix the errors in the form.");
+      
+      const firstErrorKey = Object.keys(fieldErrors)[0];
+      const errorMessage = fieldErrors[firstErrorKey] || "Please fix the errors in the form.";
+      toast.error(`Validation Error: ${errorMessage}`);
       return;
     }
 
@@ -404,6 +439,35 @@ export function CreatePostForm() {
           <>
             <div className="sm:col-span-2">
               <SectionDivider title="Blood Request Details" icon={<Heart className="w-4 h-4 text-primary" />} />
+            </div>
+
+            {/* AI Magic Fill Box */}
+            <div className="sm:col-span-2 bg-gradient-to-r from-primary/5 to-transparent border border-primary/20 rounded-xl p-4 mb-2 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h4 className="font-semibold text-sm text-primary">AI Magic Auto-Fill</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Just type what you need naturally! Example: <span className="italic text-foreground">"I urgently need 2 bags of O+ blood for my father's surgery at Dhaka Medical College."</span>
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <textarea
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="Describe your requirement here..."
+                  className={textareaClass + " flex-1 min-h-[60px] sm:min-h-[40px]"}
+                  disabled={parseAIMutation.isPending}
+                />
+                <Button
+                  type="button"
+                  onClick={() => parseAIMutation.mutate(aiPrompt)}
+                  disabled={!aiPrompt.trim() || parseAIMutation.isPending}
+                  className="gap-2 shadow hover:shadow-md transition-all self-end sm:self-auto h-[60px] sm:h-auto"
+                >
+                  {parseAIMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {parseAIMutation.isPending ? "Parsing..." : "Magic Fill"}
+                </Button>
+              </div>
             </div>
 
             {/* Blood Group */}
@@ -523,7 +587,7 @@ export function CreatePostForm() {
                     onChange={(e) => handleChange("donationTime", e.target.value)}
                     onBlur={() => handleBlur("donationTime")}
                     className={inputClass}
-                    min={new Date().toISOString().slice(0, 16)}
+                    min={getLocalISOString()}
                   />
                   <FieldError message={touched.donationTime ? errors.donationTime : undefined} />
                 </div>
@@ -540,7 +604,7 @@ export function CreatePostForm() {
                     value={form.donationTime}
                     onChange={(e) => handleChange("donationTime", e.target.value)}
                     className={inputClass}
-                    min={new Date().toISOString().slice(0, 16)}
+                    min={getLocalISOString()}
                   />
                 </div>
               )}
@@ -630,6 +694,7 @@ export function CreatePostForm() {
                           // Reset previous lookup if phone changes
                           if (donorLookupPhone) setDonorLookupPhone("");
                         }}
+                        onBlur={() => handleBlur("donorContactNumber")}
                         className={`${inputClass} rounded-l-none`}
                         maxLength={10}
                       />
@@ -651,6 +716,7 @@ export function CreatePostForm() {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">10-digit number, e.g. 1XXXXXXXXX</p>
+                  <FieldError message={touched.donorContactNumber ? errors.donorContactNumber : undefined} />
                 </div>
 
                 {/* Donor found (B-2 or B-3) */}
@@ -695,8 +761,10 @@ export function CreatePostForm() {
                           placeholder="Full Name"
                           value={form.donorName}
                           onChange={(e) => handleChange("donorName", e.target.value)}
+                          onBlur={() => handleBlur("donorName")}
                           className={inputClass}
                         />
+                        <FieldError message={touched.donorName ? errors.donorName : undefined} />
                       </div>
                       {/* Blood Group */}
                       <div className="space-y-1">
@@ -704,6 +772,7 @@ export function CreatePostForm() {
                         <select
                           value={form.donorBloodGroup}
                           onChange={(e) => handleChange("donorBloodGroup", e.target.value)}
+                          onBlur={() => handleBlur("donorBloodGroup")}
                           className={selectClass}
                         >
                           <option value="">Select</option>
@@ -711,6 +780,7 @@ export function CreatePostForm() {
                             <option key={bg.value} value={bg.value}>{bg.label}</option>
                           ))}
                         </select>
+                        <FieldError message={touched.donorBloodGroup ? errors.donorBloodGroup : undefined} />
                       </div>
                       {/* Gender */}
                       <div className="space-y-1">
@@ -718,12 +788,14 @@ export function CreatePostForm() {
                         <select
                           value={form.donorGender}
                           onChange={(e) => handleChange("donorGender", e.target.value)}
+                          onBlur={() => handleBlur("donorGender")}
                           className={selectClass}
                         >
                           <option value="">Select</option>
                           <option value="MALE">Male</option>
                           <option value="FEMALE">Female</option>
                         </select>
+                        <FieldError message={touched.donorGender ? errors.donorGender : undefined} />
                       </div>
                     </div>
                     {/* ↓ Contact number and area selection are in the common fields below (required for this case) */}
@@ -771,7 +843,7 @@ export function CreatePostForm() {
                 onChange={(e) => handleChange("donationTime", e.target.value)}
                 onBlur={() => handleBlur("donationTime")}
                 className={inputClass}
-                max={new Date().toISOString().slice(0, 16)}
+                max={getLocalISOString()}
               />
               <p className="text-xs text-muted-foreground">When did the donation happen? Date must be today or in the past.</p>
               <FieldError message={touched.donationTime ? errors.donationTime : undefined} />

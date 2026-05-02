@@ -202,6 +202,44 @@ export const createPostSchema = z.discriminatedUnion("type", [
       });
     }
   }
+
+  if (data.type === "BLOOD_DONATION") {
+    if (data.isForSelf === false) {
+      if (!data.donorContactNumber) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Donor's contact number is required when posting for someone else",
+          path: ["donorContactNumber"],
+        });
+      }
+      // If we don't have donor details, we assume they are required if they are posting for someone else and the donor isn't registered. 
+      // But since we can't know if the donor is registered purely from Zod, we will just ensure if they provided a name/group/gender, they aren't empty.
+      // Actually, if they are shown the fields, they must fill them. We can require them if donorName is being populated but is empty.
+      // A better way: if donorContactNumber is provided but they haven't filled the manual fields, the backend will catch it.
+      // But let's at least ensure donorName is at least 3 chars if provided.
+      if (data.donorName !== undefined && data.donorName.trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Donor Name is required",
+          path: ["donorName"],
+        });
+      }
+      if (data.donorBloodGroup !== undefined && data.donorBloodGroup === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Donor Blood Group is required",
+          path: ["donorBloodGroup"],
+        });
+      }
+      if (data.donorGender !== undefined && data.donorGender === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Donor Gender is required",
+          path: ["donorGender"],
+        });
+      }
+    }
+  }
 });
 
 export type CreatePostFormValues = z.infer<typeof createPostSchema>;

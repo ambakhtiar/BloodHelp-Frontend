@@ -152,7 +152,7 @@ export default function Footer() {
                 </ul>
               </div>
 
-            </div>
+            </div>git
           </div>
         </div>
 

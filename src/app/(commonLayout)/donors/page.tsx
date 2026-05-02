@@ -13,31 +13,34 @@ export default function DonorsPage() {
   return (
     <main className="min-h-screen bg-background pb-20">
       {/* PAGE HEADER / HERO */}
-      <section className="relative py-16 bg-primary/5 border-b border-primary/10 overflow-hidden">
+      <section className="relative py-10 bg-primary/5 border-b border-primary/10 overflow-hidden">
         {/* Abstract Background Shapes */}
         <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4 border border-primary/20">
-              <UserCheck className="w-4 h-4" /> Verified Volunteers
+          <div className="max-w-4xl flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider mb-3 border border-primary/20">
+                <UserCheck className="w-3 h-3" /> Verified Volunteers
+              </div>
+              <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2 tracking-tight leading-tight">
+                Find <span className="text-primary">Life-Savers</span> Near You
+              </h1>
+              <p className="text-sm text-muted-foreground font-medium max-w-xl leading-relaxed">
+                Use our advanced filters to find verified donors in your specific area across Bangladesh.
+              </p>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight leading-none">
-              Find <span className="text-primary font-bold">Life-Savers</span> <br />
-              Near You.
-            </h1>
-            <p className="text-lg text-muted-foreground font-normal max-w-2xl leading-relaxed">
-              Searching for blood is now easier and faster. Use our advanced filters to find verified donors in your specific area across Bangladesh.
-            </p>
 
-            <DonorStatsRow />
+            <div className="shrink-0">
+              <DonorStatsRow />
+            </div>
           </div>
         </div>
       </section>
 
       {/* SEARCH CONTAINER SECTION */}
-      <div className="container mx-auto px-4 -mt-8 relative z-20">
+      <div className="container mx-auto px-4 -mt-6 relative z-20">
         <DonorSearchContainer />
       </div>
 

@@ -47,7 +47,7 @@ export function CompleteProfileForm() {
 
   const form = useForm({
     defaultValues: {
-      name: user?.googleName || user?.name || "",
+      name: user?.googleName || "",
       contactNumber: "",
       division: "",
       district: "",

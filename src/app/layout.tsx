@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import AppProviders from "@/providers/AppProviders";
 import PasswordChangeGuard from "@/components/shared/PasswordChangeGuard";
+import ChatWidget from "@/components/shared/ChatWidget";
 
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
@@ -45,6 +46,7 @@ export default function RootLayout({
         <AppProviders>
           <PasswordChangeGuard>
             {children}
+            <ChatWidget />
           </PasswordChangeGuard>
         </AppProviders>
         <Toaster richColors position="bottom-right" duration={3000} closeButton />

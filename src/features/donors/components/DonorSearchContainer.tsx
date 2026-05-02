@@ -8,6 +8,7 @@ import { DonorCard, DonorCardSkeleton } from "./DonorCard";
 import { SearchX, Users, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Pagination } from "@/components/shared/Pagination";
 
 export function DonorSearchContainer() {
   const [filters, setFilters] = useState<DonorFilters>({
@@ -16,6 +17,8 @@ export function DonorSearchContainer() {
     division: "",
     district: "",
     upazila: "",
+    page: 1,
+    limit: 12,
   });
 
   const { data, isLoading, isFetching } = useQuery({
@@ -25,10 +28,21 @@ export function DonorSearchContainer() {
   });
 
   const handleFilterChange = (newFilters: DonorFilterValues) => {
-    setFilters(newFilters);
+    setFilters({
+      ...newFilters,
+      page: 1, // Reset to page 1 when filters change
+      limit: 12,
+    });
+  };
+
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
+    // Scroll to top of results
+    window.scrollTo({ top: 400, behavior: "smooth" });
   };
 
   const donors = data?.data || [];
+  const meta = data?.meta;
 
   return (
     <div className="space-y-10">
@@ -50,7 +64,7 @@ export function DonorSearchContainer() {
             </h2>
           </div>
           <p className="text-sm font-bold text-muted-foreground">
-            {isLoading ? "Searching..." : `${donors.length} donors found`}
+            {isLoading ? "Searching..." : `${meta?.total || 0} donors found`}
           </p>
         </div>
 
@@ -62,12 +76,22 @@ export function DonorSearchContainer() {
             ))}
           </div>
         ) : donors.length > 0 ? (
-          /* DONOR GRID */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in zoom-in duration-500">
-            {donors.map((donor) => (
-              <DonorCard key={donor.id} donor={donor} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in zoom-in duration-500">
+              {donors.map((donor) => (
+                <DonorCard key={donor.id} donor={donor} />
+              ))}
+            </div>
+
+            {/* PAGINATION */}
+            {meta && meta.totalPage > 1 && (
+              <Pagination 
+                currentPage={meta.page} 
+                totalPages={meta.totalPage} 
+                onPageChange={handlePageChange} 
+              />
+            )}
+          </>
         ) : (
           /* EMPTY STATE */
           <div className="flex flex-col items-center justify-center p-12 text-center bg-card/20 backdrop-blur-sm rounded-2xl border-2 border-dashed border-primary/10 min-h-[400px] animate-in fade-in slide-in-from-bottom-4 duration-500">
