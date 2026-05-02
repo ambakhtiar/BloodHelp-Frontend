@@ -32,3 +32,15 @@ export const getTopDonors = async (): Promise<ApiResponse<ITopDonor[]>> => {
   const response = await axiosInstance.get<ApiResponse<ITopDonor[]>>("/public/top-donors");
   return response.data;
 };
+/**
+ * Sends a contact form message to the admin
+ */
+export const sendContactMessage = async (payload: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}): Promise<ApiResponse<any>> => {
+  const response = await axiosInstance.post<ApiResponse<any>>("/public/contact", payload);
+  return response.data;
+};

@@ -50,9 +50,9 @@ export default function Footer() {
             </div>
 
             {/* Middle Section: Links */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 pt-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 pt-12">
 
-              {/* Important Links */}
+              {/* Explore Links */}
               <div className="space-y-5 text-center sm:text-left">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/80">
                   Explore
@@ -60,9 +60,9 @@ export default function Footer() {
                 <ul className="space-y-3">
                   {[
                     { href: "/feed", label: "Blood Feed" },
-                    { href: "/feed?type=HELPING", label: "Crowdfunding Campaigns" },
-                    { href: "/about", label: "About Our Mission" },
-                    { href: "/privacy", label: "Privacy Policy" },
+                    { href: "/feed?type=HELPING", label: "Financial Help" },
+                    { href: "/donors", label: "Donor Directory" },
+                    { href: "/about", label: "Our Mission" },
                   ].map((link) => (
                     <li key={link.href}>
                       <Link
@@ -76,17 +76,40 @@ export default function Footer() {
                 </ul>
               </div>
 
-              {/* For Organizations */}
+              {/* Support & Community */}
               <div className="space-y-5 text-center sm:text-left">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/80">
-                  Organizations
+                  Support
                 </h3>
                 <ul className="space-y-3">
                   {[
-                    { href: "/auth/register", label: "Register Hospital" },
-                    { href: "/auth/register", label: "Register NGO/Organisation" },
-                    { href: "/about", label: "How It Works" },
-                    { href: "/about", label: "Partner With Us" },
+                    { href: "/support", label: "Help & FAQ" },
+                    { href: "/contact", label: "Contact Us" },
+                    { href: "/auth/register", label: "Join as Donor" },
+                    { href: "/auth/register", label: "Partner Register" },
+                  ].map((link, i) => (
+                    <li key={i}>
+                      <Link
+                        href={link.href}
+                        className="text-base text-muted-foreground transition-colors hover:text-primary font-medium"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Legal & Safety */}
+              <div className="space-y-5 text-center sm:text-left">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/80">
+                  Legal
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    { href: "/terms", label: "Terms of Service" },
+                    { href: "/privacy", label: "Privacy Policy" },
+                    { href: "/support", label: "Medical Disclaimer" },
                   ].map((link, i) => (
                     <li key={i}>
                       <Link
@@ -103,27 +126,27 @@ export default function Footer() {
               {/* Contact Information */}
               <div className="space-y-5 flex flex-col items-center sm:items-start text-center sm:text-left">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/80">
-                  Contact Us
+                  Connect
                 </h3>
                 <ul className="space-y-4">
                   <li className="flex items-center justify-center sm:justify-start gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                       <Mail className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="text-base text-muted-foreground font-medium">support@{(process.env.NEXT_PUBLIC_APP_NAME_FF || 'blood') + (process.env.NEXT_PUBLIC_APP_NAME_SS || 'link').toLowerCase()}.bd</span>
+                    <span className="text-sm text-muted-foreground font-medium">support@bloodlink.com</span>
                   </li>
                   <li className="flex items-center justify-center sm:justify-start gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                       <Phone className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="text-base text-muted-foreground font-medium">+880 1711-223344</span>
+                    <span className="text-sm text-muted-foreground font-medium">+880 1711223344</span>
                   </li>
                   <li className="flex items-center justify-center sm:justify-start gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                       <MapPin className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="text-base text-muted-foreground font-medium">
-                      Cox's Bazar, Bangladesh
+                    <span className="text-sm text-muted-foreground font-medium">
+                      Matarbari, Maheshkhali, Cox's Bazar, Bangladesh.
                     </span>
                   </li>
                 </ul>
