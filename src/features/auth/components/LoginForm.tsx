@@ -76,13 +76,13 @@ export function LoginForm() {
     mutationFn: googleLoginApi,
     onSuccess: async (data: any) => {
       if (data?.data?.accessToken) setAccessToken(data.data.accessToken);
-      
+
       const user = data?.data?.user;
       const isNewUser = data?.data?.isNewUser;
-      
+
       if (user) {
         setUser(user);
-        
+
         if (isNewUser || user.accountStatus === "INCOMPLETE") {
           toast.success("Google account created! Please complete your profile.");
           router.replace("/auth/complete-profile");
@@ -115,8 +115,8 @@ export function LoginForm() {
     mutation.mutate(result.data);
   };
 
-  const handleDemoLogin = (email: string) => {
-    const testData = { emailOrPhone: email, password: "112233" };
+  const handleDemoLogin = (email: string, pass = "112233") => {
+    const testData = { emailOrPhone: email, password: pass };
     setFormData(testData);
     setErrors({});
     setServerError(null);
@@ -127,71 +127,71 @@ export function LoginForm() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <form onSubmit={handleSubmit} className="space-y-5">
-      {serverError && (
-        <div className="flex animate-in fade-in slide-in-from-top-2 duration-300 items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive shadow-sm">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
-          <div className="flex-1 text-sm font-medium leading-relaxed">
-            {serverError}
+        {serverError && (
+          <div className="flex animate-in fade-in slide-in-from-top-2 duration-300 items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive shadow-sm">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+            <div className="flex-1 text-sm font-medium leading-relaxed">
+              {serverError}
+            </div>
+            <button
+              type="button"
+              onClick={() => setServerError(null)}
+              className="rounded-md p-1 hover:bg-destructive/10 transition-colors"
+            >
+              <XCircle className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setServerError(null)}
-            className="rounded-md p-1 hover:bg-destructive/10 transition-colors"
-          >
-            <XCircle className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium leading-none">
-          Email or Phone Number <span className="text-destructive">*</span>
-        </label>
-        <input
-          type="text"
-          placeholder="you@example.com or +8801XXXXXXXXX"
-          value={formData.emailOrPhone}
-          onChange={(e) => handleChange("emailOrPhone", e.target.value)}
-          onBlur={() => handleBlur("emailOrPhone")}
-          className={inputClass}
-        />
-        {touched.emailOrPhone && errors.emailOrPhone && (
-          <p className="text-sm text-destructive">{errors.emailOrPhone}</p>
         )}
-      </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div className="space-y-2">
           <label className="text-sm font-medium leading-none">
-            Password <span className="text-destructive">*</span>
+            Email or Phone Number <span className="text-destructive">*</span>
           </label>
-          <Link
-            href="/auth/forgot-password"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            Forgot password?
-          </Link>
+          <input
+            type="text"
+            placeholder="you@example.com or +8801XXXXXXXXX"
+            value={formData.emailOrPhone}
+            onChange={(e) => handleChange("emailOrPhone", e.target.value)}
+            onBlur={() => handleBlur("emailOrPhone")}
+            className={inputClass}
+          />
+          {touched.emailOrPhone && errors.emailOrPhone && (
+            <p className="text-sm text-destructive">{errors.emailOrPhone}</p>
+          )}
         </div>
-        <input
-          type="password"
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={(e) => handleChange("password", e.target.value)}
-          onBlur={() => handleBlur("password")}
-          className={inputClass}
-        />
-        {touched.password && errors.password && (
-          <p className="text-sm text-destructive">{errors.password}</p>
-        )}
-      </div>
 
-      <Button type="submit" className="w-full h-11" disabled={mutation.isPending}>
-        {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Sign In
-      </Button>
-    </form>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium leading-none">
+              Password <span className="text-destructive">*</span>
+            </label>
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={(e) => handleChange("password", e.target.value)}
+            onBlur={() => handleBlur("password")}
+            className={inputClass}
+          />
+          {touched.password && errors.password && (
+            <p className="text-sm text-destructive">{errors.password}</p>
+          )}
+        </div>
+
+        <Button type="submit" className="w-full h-11" disabled={mutation.isPending}>
+          {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Sign In
+        </Button>
+      </form>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -202,8 +202,8 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-4 py-2">
-        <div className="w-full">
+      <div className="flex justify-center w-full mt-2">
+        <div className="flex justify-center w-[300px]">
           <GoogleLogin
             onSuccess={async (credentialResponse: CredentialResponse) => {
               if (credentialResponse.credential) {
@@ -211,13 +211,14 @@ export function LoginForm() {
               }
             }}
             onError={() => {
-              toast.error("Google Sign-In failed. Please try again.");
+              toast.error("Google Sign-In failed. Please ensure your browser allows popups.");
             }}
-            useOneTap
-            width="100%"
+            useOneTap={false}
+            auto_select={false}
             theme="outline"
             shape="rectangular"
             text="signin_with"
+            size="large"
           />
         </div>
       </div>
@@ -232,16 +233,26 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('user@demo.com')} disabled={mutation.isPending}>
-          <User className="mr-2 h-3.5 w-3.5" /> User
-        </Button>
-        <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('hospital@demo.com')} disabled={mutation.isPending}>
-          <Building className="mr-2 h-3.5 w-3.5" /> Hospital
-        </Button>
-        <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('org@demo.com')} disabled={mutation.isPending}>
-          <Heart className="mr-2 h-3.5 w-3.5" /> Organisation
-        </Button>
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('superadmin@bloodhelp.com', 'admin123')} disabled={mutation.isPending}>
+            <User className="mr-2 h-3.5 w-3.5" /> Super Admin
+          </Button>
+          <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('admin@bloodhelp.com', 'admin123')} disabled={mutation.isPending}>
+            <User className="mr-2 h-3.5 w-3.5" /> Admin
+          </Button>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('user@demo.com')} disabled={mutation.isPending}>
+            <User className="mr-2 h-3.5 w-3.5" /> User
+          </Button>
+          <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('hospital@demo.com')} disabled={mutation.isPending}>
+            <Building className="mr-2 h-3.5 w-3.5" /> Hospital
+          </Button>
+          <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleDemoLogin('org@demo.com')} disabled={mutation.isPending}>
+            <Heart className="mr-2 h-3.5 w-3.5" /> Organisation
+          </Button>
+        </div>
       </div>
     </div>
   );

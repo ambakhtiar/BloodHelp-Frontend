@@ -28,7 +28,12 @@ function QueryProvider({ children }: { children: ReactNode }) {
 }
 
 export default function AppProviders({ children }: { children: ReactNode }) {
+  // In Next.js, client-side environment variables must be prefixed with NEXT_PUBLIC_
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
+  if (typeof window !== "undefined" && !googleClientId && process.env.NODE_ENV === "production") {
+    console.warn("[BloodLink] Google Client ID is missing. Google Login will not function correctly on Vercel.");
+  }
 
   return (
     <QueryProvider>

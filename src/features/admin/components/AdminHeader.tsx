@@ -63,6 +63,12 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
         <h1 className="text-sm font-bold md:text-xl capitalize truncate max-w-[120px] sm:max-w-none">
           {getPageTitle(pathname)}
         </h1>
+        {user?.role && (
+          <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20">
+            <span className="h-1 w-1 rounded-full bg-primary animate-pulse" />
+            {user.role.replace("_", " ")}
+          </div>
+        )}
         <div className="ml-auto flex-1 md:grow-0 hidden lg:block">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

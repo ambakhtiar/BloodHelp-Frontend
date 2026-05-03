@@ -38,6 +38,7 @@ export const silentRefresh = async (): Promise<string> => {
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
+  timeout: 15000, // 15s timeout to prevent infinite hangs
   headers: { "Content-Type": "application/json" },
 });
 
@@ -105,7 +106,9 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         removeAccessToken();
-        if (typeof window !== "undefined") {
+        
+        // Only redirect to login if we're not already there and if the refresh actually failed
+        if (typeof window !== "undefined" && !window.location.pathname.includes("/auth/login")) {
           window.location.href = "/auth/login";
         }
         return Promise.reject(refreshError);

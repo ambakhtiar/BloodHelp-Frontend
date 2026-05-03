@@ -80,11 +80,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        await silentRefresh();
-        const currentUser = await fetchCurrentUser();
-        setUser(currentUser);
-      } catch {
-        // No valid refresh token cookie — user is a guest
+        // 1. Attempt to get a new access token using the refresh cookie
+        const token = await silentRefresh().catch(() => null);
+        
+        // 2. Only fetch user profile if we have a valid access token
+        if (token) {
+          const currentUser = await fetchCurrentUser();
+          setUser(currentUser);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Auth initialization failed:", error);
         setUser(null);
       } finally {
         setIsLoading(false);

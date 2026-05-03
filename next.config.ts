@@ -40,7 +40,11 @@ const nextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: process.env.BASE_URL ? `${process.env.BASE_URL}/:path*` : 'http://localhost:5000/api/v1/:path*',
+        destination: process.env.BASE_URL 
+          ? `${process.env.BASE_URL}/:path*` 
+          : (process.env.NODE_ENV === 'production' 
+              ? '/api-not-configured/:path*' // This will help identify missing env vars on Vercel
+              : 'http://localhost:5000/api/v1/:path*'),
       },
     ];
   },

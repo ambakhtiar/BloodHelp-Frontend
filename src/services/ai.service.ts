@@ -17,11 +17,23 @@ export const parseBloodPostWithAI = async (text: string): Promise<ParsedBloodPos
     return response.data.data;
 };
 
+export interface AIModelStatus {
+    id: string;
+    name: string;
+    status: 'active' | 'exhausted_minute' | 'exhausted_day';
+}
+
+export const getModels = async (): Promise<AIModelStatus[]> => {
+    const response = await axiosInstance.get("/ai/models");
+    return response.data.data;
+};
+
 export const chatWithAI = async (
     message: string,
-    history: Array<{ role: string; content: string }>
+    history: Array<{ role: string; content: string }>,
+    modelId?: string
 ): Promise<string> => {
-    const response = await axiosInstance.post("/ai/chat", { message, history });
+    const response = await axiosInstance.post("/ai/chat", { message, history, modelId });
     return response.data.data.response;
 };
 

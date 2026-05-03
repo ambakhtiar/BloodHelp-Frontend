@@ -78,7 +78,7 @@ export default function AdminSidebar({ className, onClose }: AdminSidebarProps) 
                 onClick={onClose}
                 className={cn(
                   "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
-                  pathname === item.href
+                  pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
                     ? "bg-primary/10 text-primary shadow-sm"
                     : "transparent text-muted-foreground"
                 )}
